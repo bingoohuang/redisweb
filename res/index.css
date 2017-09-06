@@ -1,0 +1,194 @@
+body {
+    font-family: Consolas, Monaco, monospace;
+}
+
+.operationArea {
+    margin-bottom: 10px;
+}
+
+#filterKeys {
+    width: 150px;
+}
+
+#serverFilterKeys {
+    width: 200px;
+}
+
+#keysLabel {
+    margin-left: -20px;
+}
+
+.contentTable {
+    min-width: 500px;
+    width: 90%;
+}
+
+#code {
+    width: 99%;
+    border: 0;
+}
+
+#refreshKeys, #redisTerminal {
+    margin-left: -10px;
+}
+
+#sidebar {
+    margin-top: 10px;
+    margin-left: 10px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 290px;
+    overflow: auto;
+}
+
+.titleCell {
+    background-color: lightyellow;
+    width: 50px;
+}
+
+p {
+    margin: 2px;
+}
+
+#key, #ttl {
+    width: 95%;
+}
+
+#keys {
+    width: 290px;
+    overflow: auto;
+}
+
+.chosen {
+    color: blue;
+}
+
+#directCmd {
+    width: 500px;
+}
+
+#directCmdResult {
+    margin-top: 10px;
+    background-color: black;
+    color: white;
+    width: 90%;
+}
+
+#directCmdResult pre {
+    margin: 0;
+}
+
+#keys ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#keys ul {
+    margin-left: 6px;
+}
+
+#keys ul li:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#keys ul li {
+    padding-left: 16px;
+    white-space: nowrap;
+}
+
+#keys ul li span {
+    margin-right: 5px;
+}
+
+#keys ul li.last { /* Hard-coded substitute for :last-child */
+    margin-bottom: 20px;
+}
+
+.deltree {
+    display: none;
+}
+
+#keys .icon:hover .deltree {
+    display: inline;
+}
+
+#resize {
+    position: fixed;
+    top: 0;
+    left: 300px;
+    bottom: 0;
+    width: 5px;
+    background-color: #aaa;
+    cursor: col-resize;
+    padding: 0;
+    margin: 0;
+}
+
+#resize-layover {
+    position: fixed;
+    top: 0;
+    left: 305px;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+#frame {
+    padding-left: 20px;
+    margin-top: 10px;
+    position: fixed;
+    top: 0;
+    left: 305px;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+}
+
+.key {
+    font-weight: bold;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+#keys:focus {
+    outline: 0px solid transparent;
+}
+
+span.sprite {
+    display: inline-block;
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+.keyDelete {
+    display: inline-block;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table td {
+    border: 1px solid #eeeeee;
+    word-wrap: break-word;
+    max-width: 1000px;
+}
+
+textarea {
+    min-width: 500px;
+}
+
+.CodeMirror {
+    min-width: 500px;
+    height: auto;
+}
+
+.info {
+    color: #aaa;
+    font-weight: normal;
+}

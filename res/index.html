@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>redis web</title>
+    <link rel="icon" type="image/x-icon" href="favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.png">
+    <style>
+        /*.CSS*/
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <div class="operationArea">
+        server: <select id="servers">
+        <serverOptions/>
+    </select>
+        db:<select id="databases">
+        <databaseOptions/>
+    </select>
+        <span id="redisInfo" class="sprite sprite-info"></span>
+        <span id="redisTerminal" class="sprite sprite-terminal"></span>
+        <p><input id="serverFilterKeys" placeholder="Filter keys from server">
+            <button id="serverFilterKeysBtn">Filter!</button>
+    </div>
+    <div>
+        <span class="sprite sprite-folder-open"></span>
+        <span id="keysLabel">Keys</span>
+        <span class="info" id="keysNum">(0)</span>
+        <span id="addKey" class="sprite sprite-add"></span>
+        <span id="refreshKeys" class="sprite sprite-refresh"></span>
+        <input id="filterKeys" placeholder="Type to filter keys">
+    </div>
+    <div id="keys">
+    </div>
+
+</div>
+<div id="resize"></div>
+<div id="frame"></div>
+<script>
+    /*.SCRIPT*/
+</script>
+</body>
+</html>
