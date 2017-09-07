@@ -118,6 +118,7 @@ func main() {
 	http.HandleFunc(contextPath+"/showContent", serveShowContent)
 	http.HandleFunc(contextPath+"/changeContent", serveNewKey)
 	http.HandleFunc(contextPath+"/deleteKey", serveDeleteKey)
+	http.HandleFunc(contextPath+"/deleteMultiKeys", serveDeleteMultiKeys)
 	http.HandleFunc(contextPath+"/newKey", serveNewKey)
 	http.HandleFunc(contextPath+"/redisInfo", serveRedisInfo)
 	http.HandleFunc(contextPath+"/redisCli", serveRedisCli)
@@ -233,7 +234,19 @@ func serveDeleteKey(w http.ResponseWriter, req *http.Request) {
 	key := strings.TrimSpace(req.FormValue("key"))
 	server := findRedisServer(req)
 
-	ok := deleteKey(server, key)
+	ok := deleteMultiKeys(server, key)
+	w.Write([]byte(ok))
+}
+
+func serveDeleteMultiKeys(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	keys := strings.TrimSpace(req.FormValue("keys"))
+	server := findRedisServer(req)
+
+	var multiKeys []string
+	json.Unmarshal([]byte(keys), &multiKeys)
+
+	ok := deleteMultiKeys(server, multiKeys...)
 	w.Write([]byte(ok))
 }
 

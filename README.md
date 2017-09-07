@@ -4,7 +4,7 @@ redis web admin based on go lang
 # build
 1. `go get -u github.com/jteeuwen/go-bindata/...`
 2. `go get golang.org/x/tools/cmd/goimports`
-3. `/gobin.sh & go build` 
+3. `./gobin.sh & go build` 
 5. build for linux :`env GOOS=linux GOARCH=amd64 go build -o go-redis-web.linux.bin`
 
 # startup
@@ -21,8 +21,6 @@ Usage of ./go-redis-web:
     	servers list, eg: Server1=localhost:6379,Server2=password2/localhost:6388/0 (default "default=localhost:6379")
 
 ```
-
-
 
 # snapshots
 ![image](https://user-images.githubusercontent.com/1940588/30140520-d5e9c8da-93a7-11e7-8b79-09cc3c24ed26.png)

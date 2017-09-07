@@ -107,12 +107,13 @@ func newKey(server RedisServer, keyType, key, ttl, val string) string {
 
 }
 
-func deleteKey(server RedisServer, key string) string {
+
+func deleteMultiKeys(server RedisServer, keys... string) string {
 	client := newRedisClient(server)
 	defer client.Close()
 
-	ok, err := client.Del(key).Result()
-	if ok == 1 {
+	ok, err := client.Del(keys...).Result()
+	if ok > 0 {
 		return "OK"
 	} else {
 		return err.Error()

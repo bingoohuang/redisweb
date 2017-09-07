@@ -24,6 +24,53 @@ $(function () {
         refreshKeys()
     }).click()
 
+    $('#serverFilterKeys').keydown(function (event) {
+        var keyCode = event.keyCode || event.which
+        if (keyCode == 13) {
+            refreshKeys()
+        }
+    })
+
+    $('#checkAllChk').click(function () {
+        var checked = $('#checkAllChk').is(":checked")
+        $('#keys ul li:visible').each(function (index, li) {
+            $(li).find('input:checkbox').prop('checked', checked)
+        })
+    })
+
+    $('#deleteCheckedKeys').click(function () {
+        var keys = []
+        $('#keys ul li:visible').each(function (index, li) {
+            var $li = $(li)
+            if ($li.find('input:checkbox').is(":checked")) {
+                var key = $li.find('.keyValue').text()
+                keys.push(key)
+            }
+        })
+
+        if (!confirm("Are you sure to delete " + keys.length + " keys?")) {
+            return
+        }
+
+        $.ajax({
+            type: 'POST', url: pathname + "/deleteMultiKeys",
+            data: {server: $('#servers').val(), database: $('#databases').val(), keys: JSON.stringify(keys)},
+            success: function (content, textStatus, request) {
+                if (content != 'OK') {
+                    alert(content)
+                } else {
+                    removeKeys(keys)
+                    $('#checkAllChk').prop('checked', false)
+                    $('#frame').html('<div><span class="key">' + keys.length + ' keys were deleted:</span></div>'
+                        + '<div>' + keys.join('<br>') + '</div>')
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+            }
+        })
+    })
+
     function executeRedisCmd() {
         var cmd = $('#directCmd').val()
         var server = $('#servers').val()
@@ -80,7 +127,7 @@ $(function () {
             var key = keysArray[i]
             var nodeCss = i < keysArray.length - 1 ? "sprite-tree-node" : "sprite-tree-lastnode last"
             keysHtml += '<li class="datatype-' + key.Type + ' sprite ' + nodeCss + '" data-type="' + key.Type + '">' +
-                '<span class="sprite sprite-datatype-' + key.Type + '"></span><span class="keyValue">' + key.Key + '</span></li>'
+                '<input type="checkbox"><span class="sprite sprite-datatype-' + key.Type + '"></span><span class="keyValue">' + key.Key + '</span></li>'
         }
         keysHtml += '</ul>'
 
@@ -127,6 +174,15 @@ $(function () {
             if ($span.text() == key) {
                 $(li).addClass('chosen')
                 return false
+            }
+        })
+    }
+
+    function removeKeys(keys) {
+        $('#keys ul li').removeClass('chosen').each(function (index, li) {
+            var $span = $(li).find('.keyValue')
+            if ($.inArray($span.text(), keys) > -1) {
+                $(li).remove()
             }
         })
     }
@@ -372,7 +428,7 @@ $(function () {
                             alert(content)
                         } else {
                             removeKey(key)
-                            $('#frame').html('<div><span class="key">' + key + ' does not exits</span></div>')
+                            $('#frame').html('<div><span class="key">' + key + ' was deleted</span></div>')
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
@@ -420,7 +476,7 @@ $(function () {
                 break;
             case 38: // up
                 if (keysFocused) {
-                    $('#keys ul li').each(function (index, li) {
+                    $('#keys ul li:visible').each(function (index, li) {
                         $li = $(li)
                         if ($li.hasClass('chosen')) {
                             $li.prev().click()
@@ -433,7 +489,7 @@ $(function () {
                 break;
             case 40: // down
                 if (keysFocused) {
-                    $('#keys ul li').each(function (index, li) {
+                    $('#keys ul li:visible').each(function (index, li) {
                         $li = $(li)
                         if ($li.hasClass('chosen')) {
                             $li.next().click()
