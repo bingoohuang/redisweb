@@ -12,3 +12,4 @@ redis web admin based on go lang
 `./go-redis-web`
 
 # snapshots
+![image](https://user-images.githubusercontent.com/1940588/30140520-d5e9c8da-93a7-11e7-8b79-09cc3c24ed26.png)
