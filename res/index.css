@@ -28,7 +28,7 @@ body {
     border: 0;
 }
 
-#refreshKeys, #redisTerminal {
+#refreshKeys, #redisTerminal, #checkAllChk, #exportKeys, #filterKeys {
     margin-left: -10px;
 }
 

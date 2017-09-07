@@ -34,6 +34,91 @@ func configGetDatabases(server RedisServer) int {
 	return databaseNum
 }
 
+func exportRedisKeys(server RedisServer, keys, exportType string) interface{} {
+	client := newRedisClient(server)
+	defer client.Close()
+
+	var exportKeys []string
+	json.Unmarshal([]byte(keys), &exportKeys)
+
+	if exportType == "Redis" {
+		return exportKeysInRedisFormat(client, exportKeys)
+	} else if exportType == "JSON" {
+		return exportKeysInJSONFormat(client, exportKeys)
+	} else {
+		return ""
+	}
+}
+
+func exportKeysInJSONFormat(client *redis.Client, exportKeys []string) map[string]interface{} {
+	var result = make(map[string]interface{})
+	for _, key := range exportKeys {
+		keyType, _ := client.Type(key).Result()
+		switch keyType {
+		case "string":
+			val, _ := client.Get(key).Result()
+			result[key] = val
+		case "hash":
+			vals, _ := client.HGetAll(key).Result()
+			result[key] = vals
+		case "list":
+			len, _ := client.LLen(key).Result()
+			var i int64
+			var items = make([]interface{}, len)
+			for ; i < len; i++ {
+				val, _ := client.LIndex(key, i).Result()
+				items[i] = val
+			}
+			result[key] = items
+		case "set":
+			members, _ := client.SMembers(key).Result()
+			result[key] = members
+		case "zset":
+			members, _ := client.ZRange(key, 0, -1).Result()
+			result[key] = members
+		}
+	}
+
+	return result
+}
+
+func exportKeysInRedisFormat(client *redis.Client, exportKeys []string) []string {
+	result := make([]string, 0)
+	for _, key := range exportKeys {
+		keyType, _ := client.Type(key).Result()
+		switch keyType {
+		case "string":
+			val, _ := client.Get(key).Result()
+			result = append(result, `SET `+strconv.Quote(key)+` `+strconv.Quote(val))
+		case "hash":
+			vals, _ := client.HGetAll(key).Result()
+			for k, v := range vals {
+				result = append(result, `HSET `+strconv.Quote(key)+` `+strconv.Quote(k)+` `+strconv.Quote(v))
+			}
+		case "list":
+			len, _ := client.LLen(key).Result()
+			var i int64
+			for ; i < len; i++ {
+				val, _ := client.LIndex(key, i).Result()
+				result = append(result, `RPUSH `+strconv.Quote(key)+` `+strconv.Quote(val))
+			}
+		case "set":
+			members, _ := client.SMembers(key).Result()
+			for _, member := range members {
+				result = append(result, `SADD `+strconv.Quote(key)+` `+strconv.Quote(member)+`\r\n`)
+			}
+		case "zset":
+			members, _ := client.ZRange(key, 0, -1).Result()
+			for _, member := range members {
+				score, _ := client.ZScore(key, member).Result()
+				result = append(result, `ZADD `+strconv.Quote(key)+` `+strconv.FormatFloat(score, 'f', -1, 64)+` `+strconv.Quote(member))
+			}
+		}
+	}
+
+	return result
+}
+
 func newKey(server RedisServer, keyType, key, ttl, val string) string {
 	client := newRedisClient(server)
 	defer client.Close()
@@ -107,8 +192,7 @@ func newKey(server RedisServer, keyType, key, ttl, val string) string {
 
 }
 
-
-func deleteMultiKeys(server RedisServer, keys... string) string {
+func deleteMultiKeys(server RedisServer, keys ...string) string {
 	client := newRedisClient(server)
 	defer client.Close()
 
@@ -210,7 +294,7 @@ func convertString(s string) string {
 	}
 
 	quote := strconv.Quote(s)
-	return quote[1 : len(quote)-1]
+	return quote[1: len(quote)-1]
 }
 
 func parseStringFormat(s string) (string, string) {
@@ -227,7 +311,7 @@ func parseStringFormat(s string) (string, string) {
 	}
 
 	quote := strconv.Quote(s)
-	return quote[1 : len(quote)-1], "UNKNOWN"
+	return quote[1: len(quote)-1], "UNKNOWN"
 }
 
 func isJSON(s string) bool {

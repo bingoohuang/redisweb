@@ -38,7 +38,41 @@ $(function () {
         })
     })
 
-    $('#deleteCheckedKeys').click(function () {
+    $('#exportKeys').click(function () {
+        var contentHtml = '<div><h3>Export</h3></div>' +
+            '<div><span style="margin-right: 30px">Type:</span>' +
+            '<select style="margin-right: 30px" id="exportType"><option value="Redis">Redis</option><option value="JSON">JSON</option></select>' +
+            '<button id="exportBtn">Export</button></div>' +
+            '<pre id="exportResult"></pre>'
+
+        $('#frame').html(contentHtml)
+
+        $('#exportBtn').click(function () {
+            var keys = findCheckedKeys();
+            if (keys.length == 0) {
+                alert("No keys chosen to be deleted!")
+                return
+            }
+            var exportType = $('#exportType').val()
+            $.ajax({
+                type: 'GET', url: pathname + "/exportKeys",
+                data: {server: $('#servers').val(), database: $('#databases').val(), exportKeys: JSON.stringify(keys), exportType: exportType},
+                success: function (content, textStatus, request) {
+                    if (exportType == "Redis") {
+                        $('#exportResult').html(content.join('<br>'))
+                    } else {
+                        $('#exportResult').html(content)
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                }
+            })
+
+        })
+    })
+
+    function findCheckedKeys() {
         var keys = []
         $('#keys ul li:visible').each(function (index, li) {
             var $li = $(li)
@@ -47,6 +81,15 @@ $(function () {
                 keys.push(key)
             }
         })
+        return keys;
+    }
+
+    $('#deleteCheckedKeys').click(function () {
+        var keys = findCheckedKeys();
+        if (keys.length == 0) {
+            alert("No keys chosen to be deleted!")
+            return
+        }
 
         if (!confirm("Are you sure to delete " + keys.length + " keys?")) {
             return
