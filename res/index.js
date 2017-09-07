@@ -133,12 +133,12 @@ $(function () {
 
         $('#keys').html(keysHtml)
 
-        $('#keys ul li').click(function () {
+        $('#keys ul li span.keyValue').click(function () {
             $('#keys ul li').removeClass('chosen')
-            var $this = $(this)
-            $this.addClass('chosen')
-            var key = $this.find('.keyValue').text()
-            var type = $this.attr('data-type')
+            var $li = $(this).parent('li');
+            $li.addClass('chosen')
+            var key = $li.find('.keyValue').text()
+            var type = $li.attr('data-type')
             $.ajax({
                 type: 'GET', url: pathname + "/showContent",
                 data: {server: $('#servers').val(), database: $('#databases').val(), key: key, type: type},
@@ -150,6 +150,7 @@ $(function () {
                 }
             })
         })
+
         toggleFilterKeys()
     }
 
@@ -272,7 +273,8 @@ $(function () {
         var contentHtml = '<div><span class="key">Add another key</span></div>' +
             '<table class="contentTable">' +
             '<tr><td class="titleCell">Type:</td><td colspan="2"><select name="type" id="type">' +
-            '<option value="string">String</option><option value="hash">Hash</option><option value="list">List</option><option value="set">Set</option><option value="zset">Sorted Set</option>' +
+            '<option value="string">String</option><option value="hash">Hash</option><option value="list">List</option>' +
+            '<option value="set">Set</option><option value="zset">Sorted Set</option>' +
             '</select></td></tr>' +
             '<tr><td class="titleCell">Key:</td><td colspan="2"><input id="key" placeholder="input the new key"></td></tr>' +
             '<tr><td class="titleCell">TTL:</td><td colspan="2"><input id="ttl" placeholder="input the expired time, like 1d/1h/10s/-1s"></td></tr>' +
@@ -465,34 +467,25 @@ $(function () {
     var keysFocused = false
 
     $('#keys').attr('tabindex', -1).focusin(function () {
+        console.info('focusin')
         keysFocused = true
     }).focusout(function () {
+        console.info('focusout')
         keysFocused = false
     })
 
     $(document).keydown(function (e) {
-        switch (e.which) {
+        var which = e.which;
+        switch (which) {
             case 37: // left
-                break;
             case 38: // up
-                if (keysFocused) {
-                    $('#keys ul li:visible').each(function (index, li) {
-                        $li = $(li)
-                        if ($li.hasClass('chosen')) {
-                            $li.prev().click()
-                            return false
-                        }
-                    })
-                }
-                break;
             case 39: // right
-                break;
             case 40: // down
                 if (keysFocused) {
                     $('#keys ul li:visible').each(function (index, li) {
                         $li = $(li)
                         if ($li.hasClass('chosen')) {
-                            $li.next().click()
+                            (which == 37 || which == 38 ? $li.prev(':visible') : $li.next(':visible')).find('span.keyValue').click()
                             return false
                         }
                     })
@@ -501,7 +494,7 @@ $(function () {
             default:
                 return; // exit this handler for other keys
         }
-        e.preventDefault(); // prevent the default action (scroll / move caret)
+        e.preventDefault() // prevent the default action (scroll / move caret)
     })
 
 })
