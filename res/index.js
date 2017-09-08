@@ -43,7 +43,7 @@ $(function () {
             '<div><span style="margin-right: 30px">Type:</span>' +
             '<select style="margin-right: 30px" id="exportType"><option value="Redis">Redis</option><option value="JSON">JSON</option></select>' +
             '<button id="exportBtn">Export</button></div>' +
-            '<pre id="exportResult"></pre>'
+            '<div id="exportResult"></div>'
 
         $('#frame').html(contentHtml)
 
@@ -56,12 +56,20 @@ $(function () {
             var exportType = $('#exportType').val()
             $.ajax({
                 type: 'GET', url: pathname + "/exportKeys",
-                data: {server: $('#servers').val(), database: $('#databases').val(), exportKeys: JSON.stringify(keys), exportType: exportType},
+                data: {
+                    server: $('#servers').val(),
+                    database: $('#databases').val(),
+                    exportKeys: JSON.stringify(keys),
+                    exportType: exportType
+                },
                 success: function (content, textStatus, request) {
                     if (exportType == "Redis") {
-                        $('#exportResult').html(content.join('<br>'))
+                        $('#exportResult').html('<pre>' + content.join('<br>') + '</pre>')
                     } else {
-                        $('#exportResult').html(content)
+                        $('#exportResult').html('<textarea id="code">' + content + '</textarea>')
+                        CodeMirror.fromTextArea(document.getElementById('code'), {
+                            mode: 'application/json', lineNumbers: true, matchBrackets: true
+                        })
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
@@ -115,16 +123,21 @@ $(function () {
     })
 
     function executeRedisCmd() {
-        var cmd = $('#directCmd').val()
+        var cmd = $('#directCmd').text()
         var server = $('#servers').val()
         $.ajax({
             type: 'POST', url: pathname + "/redisCli",
             data: {server: server, database: $('#databases').val(), cmd: cmd},
             success: function (result, textStatus, request) {
-                var resultHtml = '<pre>' + server + '&gt; ' + cmd + '</pre>' +
-                    '<pre>' + result + '</pre>'
+                var resultHtml = server + '&gt;&nbsp;' + cmd + '<pre>' + result + '</pre>'
 
-                $('#directCmdResult').prepend(resultHtml)
+                $('#directCmdResult div').append(resultHtml)
+                $('#directCmd').text('')
+
+                setTimeout(function () {
+                    var scrollValue = $('#directCmdResult').height() - $(window).height()
+                    $('#frame').animate({scrollTop: scrollValue + 100}, 800)
+                }, 0)
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
@@ -133,17 +146,20 @@ $(function () {
     }
 
     $('#redisTerminal').click(function () {
-        $('#frame').html('<div><input id="directCmd" placeholder="input commands"><button id="redisTerminalBtn">Execute</button></div>' +
-            '<div id="directCmdResult"></div>')
+        $('#frame').html('<div id="directCmdResult"><div></div><span id="cmdPrompt"></span><span contenteditable="true" id="directCmd"></div>')
+        $('#cmdPrompt').html($('#servers').val() + '&gt;&nbsp;')
 
-        $('#directCmd').keydown(function (event) {
+        $('#directCmd').focus().keydown(function (event) {
             var keyCode = event.keyCode || event.which
             if (keyCode == 13) {
                 executeRedisCmd()
             }
         })
-        $('#redisTerminalBtn').click(executeRedisCmd)
+        $('#directCmdResult').click(function () {
+            $('#directCmd').focus()
+        })
     })
+
 
     $('#redisInfo').click(function () {
         $.ajax({
@@ -537,7 +553,7 @@ $(function () {
             default:
                 return; // exit this handler for other keys
         }
-        e.preventDefault() // prevent the default action (scroll / move caret)
+        // e.preventDefault() // prevent the default action (scroll / move caret)
     })
 
 })

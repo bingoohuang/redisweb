@@ -3,18 +3,18 @@ package main
 import (
 	"fmt"
 	"github.com/holys/goredis"
-	"regexp"
 	"strings"
+	"errors"
+	"strconv"
 )
 
 // Read-Eval-Print Loop
 func repl(server RedisServer, commandLine string) string {
-	reg, _ := regexp.Compile(`'.*?'|".*?"|\S+`)
+	cmds, err := parseEditorCommand(commandLine)
+	if err != nil {
+		return err.Error()
+	}
 
-	client := cliConnect(server)
-	defer client.Close()
-
-	cmds := reg.FindAllString(commandLine, -1)
 	if len(cmds) == 0 {
 		return ""
 	}
@@ -29,14 +29,84 @@ func repl(server RedisServer, commandLine string) string {
 	} else if cmd == "connect" {
 		return ""
 	} else {
+		client := cliConnect(server)
+		defer client.Close()
 		return cliSendCommand(client, cmds)
 	}
+}
+
+// Returns the executable path and arguments
+func parseEditorCommand(editorCmd string) ([]string, error) {
+	var args []string
+	state := "start"
+	current := ""
+	quote := "\""
+	for i := 0; i < len(editorCmd); i++ {
+		c := editorCmd[i]
+
+		if state == "quotes" {
+			if string(c) != quote {
+				if c == '\\' {
+					i++
+					if i >= len(editorCmd) {
+						return []string{}, errors.New(fmt.Sprintf("nothing escape in command line: %s", editorCmd))
+					}
+					current += editorCmd[i-1:i+1]
+				} else {
+					current += string(c)
+				}
+			} else {
+				current = "\"" + current + "\""
+				unquoted, _ := strconv.Unquote(current)
+				args = append(args, unquoted)
+				current = ""
+				state = "start"
+			}
+			continue
+		}
+
+		if c == '"' || c == '\'' {
+			state = "quotes"
+			quote = string(c)
+			continue
+		}
+
+		if state == "arg" {
+			if c == ' ' || c == '\t' {
+				args = append(args, current)
+				current = ""
+				state = "start"
+			} else {
+				current += string(c)
+			}
+			continue
+		}
+
+		if c != ' ' && c != '\t' {
+			state = "arg"
+			current += string(c)
+		}
+	}
+
+	if state == "quotes" {
+		return []string{}, errors.New(fmt.Sprintf("Unclosed quote in command line: %s", editorCmd))
+	}
+
+	if current != "" {
+		args = append(args, current)
+	}
+
+	if len(args) <= 0 {
+		return []string{}, errors.New("Empty command line")
+	}
+
+	return args, nil
 }
 
 func cliSendCommand(client *goredis.Client, cmds []string) string {
 	args := make([]interface{}, len(cmds[1:]))
 	for i := range args {
-		args[i] = strings.Trim(string(cmds[1+i]), "\"'")
+		args[i] = string(cmds[1+i])
 	}
 
 	cmd := strings.ToLower(cmds[0])
