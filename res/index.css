@@ -28,7 +28,7 @@ body {
     border: 0;
 }
 
-#refreshKeys, #redisTerminal, #checkAllChk, #exportKeys, #filterKeys {
+#refreshKeys, #redisTerminal, #checkAllChk, #exportKeys, #filterKeys, #redisImport {
     margin-left: -10px;
 }
 
@@ -105,7 +105,7 @@ p {
     white-space: nowrap;
 }
 
-#keys ul li input{
+#keys ul li input {
     margin-left: 0;
 }
 
@@ -195,6 +195,10 @@ textarea {
 .CodeMirror {
     min-width: 500px;
     height: auto;
+}
+
+#importDiv .CodeMirror {
+    height: 300px;
 }
 
 .info {
