@@ -581,15 +581,16 @@ $(function () {
                         $li = $(li)
                         if ($li.hasClass('chosen')) {
                             (which == 37 || which == 38 ? $li.prev(':visible') : $li.next(':visible')).find('span.keyValue').click()
+                            e.preventDefault()
                             return false
                         }
                     })
+
                 }
                 break;
             default:
                 return; // exit this handler for other keys
         }
-        // e.preventDefault() // prevent the default action (scroll / move caret)
     })
 
 })
