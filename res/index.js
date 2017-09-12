@@ -149,7 +149,7 @@ $(function () {
                     removeKeys(keys)
                     $('#checkAllChk').prop('checked', false)
                     $('#frame').html('<div><span class="key">' + keys.length + ' keys were deleted:</span></div>'
-                        + '<div>' + keys.join('<br>') + '</div>')
+                        + '<div><br>' + joinKeysWithNo(keys) + '</div>')
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -157,6 +157,22 @@ $(function () {
             }
         })
     })
+
+    function joinKeysWithNo(keys) {
+        var result = []
+        var length = keys.length;
+        var lengthSize = ('' + length).length
+        for (var i = 0; i < length; ++i) {
+            result.push(pad(i + 1, lengthSize) + '.&nbsp;' + keys[i] + '<br>')
+        }
+        return result.join('')
+    }
+
+    function pad(n, width, z) {
+        z = z || '0'
+        n = n + ''
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n
+    }
 
     function executeRedisCmd() {
         var cmd = $('#directCmd').text()
