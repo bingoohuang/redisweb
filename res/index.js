@@ -523,7 +523,7 @@ $(function () {
         })
 
         codeMirror = null
-        if (format === "JSON") {
+        if (format === "JSON" && size < 5000) {
             codeMirror = CodeMirror.fromTextArea(document.getElementById('code'), {
                 mode: 'application/json', lineNumbers: true, matchBrackets: true
             })
