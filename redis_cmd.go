@@ -366,6 +366,8 @@ func listKeys(server RedisServer, matchPattern string, maxKeys int) ([]KeysResul
 
 			var len int64
 			switch valType {
+			case "string":
+				len, _ = client.StrLen(key).Result()
 			case "list":
 				len, _ = client.LLen(key).Result()
 			case "hash":
@@ -375,7 +377,7 @@ func listKeys(server RedisServer, matchPattern string, maxKeys int) ([]KeysResul
 			case "zset":
 				len, _ = client.ZCard(key).Result()
 			default:
-				len = 1
+				len = -1
 			}
 
 			allKeys = append(allKeys, KeysResult{Key: key, Type: valType, Len: len})

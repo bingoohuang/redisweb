@@ -238,7 +238,12 @@ $(function () {
             var key = keysArray[i]
             var nodeCss = i < keysArray.length - 1 ? "sprite-tree-node" : "sprite-tree-lastnode last"
             keysHtml += '<li class="datatype-' + key.Type + ' sprite ' + nodeCss + '" data-type="' + key.Type + '">' +
-                '<input type="checkbox"><span class="sprite sprite-datatype-' + key.Type + '"></span><span class="keyValue">' + key.Key + '</span></li>'
+                '<input type="checkbox">' +
+                '<span class="sprite sprite-datatype-' + key.Type + '"></span>' +
+                '<span class="keyValue">' + key.Key + '</span>'
+
+            var numInfo = key.Len != -1 ? '(' + key.Len + ')' : ''
+            keysHtml += '<span class="info">' + numInfo + '</span></li>'
         }
         keysHtml += '</ul>'
 
