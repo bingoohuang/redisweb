@@ -29,6 +29,8 @@ var (
 
 	devMode bool // to disable css/js minify
 	servers []RedisServer
+
+	maxKeys int
 )
 
 func init() {
@@ -36,6 +38,7 @@ func init() {
 	portArg := flag.Int("port", 8269, "Port to serve.")
 	devModeArg := flag.Bool("devMode", false, "devMode(disable js/css minify)")
 	serversArg := flag.String("servers", "default=localhost:6379", "servers list, eg: Server1=localhost:6379,Server2=password2/localhost:6388/0")
+	maxKeysArg := flag.Int("maxKeys", 1000, "Max keys to be listed(0 means all keys).")
 
 	flag.Parse()
 
@@ -43,6 +46,7 @@ func init() {
 	port = *portArg
 	devMode = *devModeArg
 	servers = parseServers(*serversArg)
+	maxKeys = *maxKeysArg
 }
 
 func parseServers(serversConfig string) []RedisServer {
@@ -181,7 +185,7 @@ func serveListKeys(w http.ResponseWriter, req *http.Request) {
 	matchPattern := strings.TrimSpace(req.FormValue("pattern"))
 	server := findRedisServer(req)
 
-	keys, _ := listKeys(server, matchPattern, 1000)
+	keys, _ := listKeys(server, matchPattern, maxKeys)
 	sort.Slice(keys[:], func(i, j int) bool {
 		return keys[i].Key < keys[j].Key
 	})

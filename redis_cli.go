@@ -1,11 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/holys/goredis"
-	"strings"
-	"errors"
 	"strconv"
+	"strings"
 )
 
 // Read-Eval-Print Loop
@@ -51,7 +51,7 @@ func parseEditorCommand(editorCmd string) ([]string, error) {
 					if i >= len(editorCmd) {
 						return []string{}, errors.New(fmt.Sprintf("nothing escape in command line: %s", editorCmd))
 					}
-					current += editorCmd[i-1:i+1]
+					current += editorCmd[i-1 : i+1]
 				} else {
 					current += string(c)
 				}

@@ -294,7 +294,7 @@ func convertString(s string) string {
 	}
 
 	quote := strconv.Quote(s)
-	return quote[1: len(quote)-1]
+	return quote[1 : len(quote)-1]
 }
 
 func parseStringFormat(s string) (string, string) {
@@ -311,7 +311,7 @@ func parseStringFormat(s string) (string, string) {
 	}
 
 	quote := strconv.Quote(s)
-	return quote[1: len(quote)-1], "UNKNOWN"
+	return quote[1 : len(quote)-1], "UNKNOWN"
 }
 
 func isJSON(s string) bool {
@@ -381,7 +381,7 @@ func listKeys(server RedisServer, matchPattern string, maxKeys int) ([]KeysResul
 			allKeys = append(allKeys, KeysResult{Key: key, Type: valType, Len: len})
 		}
 
-		if cursor == 0 || len(allKeys) >= maxKeys {
+		if cursor == 0 || (maxKeys > 0 && len(allKeys) >= maxKeys) {
 			break
 		}
 	}
