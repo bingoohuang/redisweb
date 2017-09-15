@@ -244,7 +244,7 @@ $(function () {
                 }
 
                 convenientConfig = result
-                var contentHtml = '<div>'
+                var contentHtml = '<div class="itemNames">'
                 for (var i = 0, len = convenientConfig.Items.length; i < len; i++) {
                     convenientConfigItem = convenientConfig.Items[i]
                     contentHtml += '<span itemIndex="' + i + '" class="convenientConfigItem">' + convenientConfigItem.Name + '</span>'
@@ -257,25 +257,93 @@ $(function () {
                     var $this = $(this);
                     $this.addClass('convenientConfigItemSelected')
                     var item = convenientConfig.Items[+$this.attr('itemIndex')]
-                    var convenientContent = '<p/><div class="convenientConfigItemEdit">' +
-                        '<div><span>Key Template:</span><span>' + item.Template + ' </span></div>'
+                    var convenientContent =
+                        '<div><span>Key Template:</span><span class="templateValue">' + item.Template + ' </span></div>'
 
                     var variables = parseTemplateVariables(item.Template)
                     for (var i = 0, len = variables.length; i < len; i++) {
                         convenientContent += '<div class="variables"><span>' + variables[i] + ':</span><span><input placeholder="variable value"></span></div>'
                     }
 
-                    convenientContent += '<div><span>Key:</span><span></span></div>'
-                    convenientContent += '<div><span>Value:</span><span></span></div>'
-                    convenientContent += '<div><span>Operations:</span><span>'
+                    convenientContent += '<div><span>Key:</span><span class="keyCreated"></span></div>'
+                    convenientContent += '<div><span>TTL:</span><span class="ttlCreated"><input value="' + item.Ttl + '"></span></div>'
+                    convenientContent += '<div><span>Value:</span><span><textarea class="valueTextArea"></textarea></span></div>'
+                    convenientContent += '<div><span>Operations:</span><span><button class="convenientButton">refresh value</button>'
                     for (var i = 0, len = item.Operations.length; i < len; i++) {
                         convenientContent += '<button class="convenientButton">' + item.Operations[i] + "</button>"
                     }
                     convenientContent += '</span></div>'
-                    convenientContent += '</div>'
 
                     $('#convenientContent').html(convenientContent)
-                })
+
+                    $(".valueTextArea").focus(function () {
+                        $(this).select()
+                    })
+
+                    var f = function () {
+                        var templateValue = $('span.templateValue').text()
+                        $('div.variables').each(function (index, div) {
+                            var $div = $(div)
+                            var variableName = $div.find('span:first').text()
+                            variableName = variableName.substring(0, variableName.length - 1)
+                            var variableValue = $div.find('input').val()
+                            templateValue = templateValue.replace("{" + variableName + "}", variableValue)
+                        })
+
+                        $('.keyCreated').text(templateValue)
+                    };
+                    var refreshValue = function () {
+                        var keyCreated = $('.keyCreated').text()
+                        $.ajax({
+                            type: 'GET', url: pathname + "/showContent",
+                            data: {server: $('#servers').val(), database: $('#databases').val(), key: keyCreated},
+                            success: function (result, textStatus, request) {
+                                $(".valueTextArea").val(result.Exists ? result.Content : "(not exists)").select()
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                            }
+                        })
+                    };
+                    $('div.variables input').keyup(f).change(f).blur(refreshValue)
+
+                    $('.convenientButton').click(function () {
+                        var $this = $(this)
+                        var keyCreated = $('.keyCreated').text()
+                        if ($this.text() == 'save') {
+                            $.ajax({
+                                type: 'POST', url: pathname + "/changeContent",
+                                data: {
+                                    server: $('#servers').val(), database: $('#databases').val(),
+                                    key: keyCreated, type: 'string', ttl: $('.ttlCreated input').val(),
+                                    value: JSON.stringify($(".valueTextArea").val())
+                                },
+                                success: function (content, textStatus, request) {
+                                    alert(content)
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                                }
+                            })
+                        } else if ($this.text() == 'delete') {
+                            $.ajax({
+                                type: 'POST', url: pathname + "/deleteKey",
+                                data: {server: $('#servers').val(), database: $('#databases').val(), key: keyCreated},
+                                success: function (content, textStatus, request) {
+                                    if (content == 'OK') {
+                                        refreshValue()
+                                    }
+                                    alert(content)
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                                }
+                            })
+                        } else if ($this.text() == 'refresh value') {
+                            refreshValue()
+                        }
+                    })
+                }).first().click()
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
@@ -328,7 +396,7 @@ $(function () {
             var type = $li.attr('data-type')
             $.ajax({
                 type: 'GET', url: pathname + "/showContent",
-                data: {server: $('#servers').val(), database: $('#databases').val(), key: key, type: type},
+                data: {server: $('#servers').val(), database: $('#databases').val(), key: key},
                 success: function (result, textStatus, request) {
                     showContent(key, type, result.Content, result.Ttl, result.Size, result.Encoding, result.Error, result.Exists, result.Format)
                 },
@@ -391,7 +459,7 @@ $(function () {
     function showContentAjax(key, type) {
         $.ajax({
             type: 'GET', url: pathname + "/showContent",
-            data: {server: $('#servers').val(), database: $('#databases').val(), key: key, type: type},
+            data: {server: $('#servers').val(), database: $('#databases').val(), key: key},
             success: function (result, textStatus, request) {
                 showContent(key, type, result.Content, result.Ttl, result.Size, result.Encoding, result.Error, result.Exists, result.Format)
             },
@@ -634,7 +702,7 @@ $(function () {
                     type: 'POST', url: pathname + "/changeContent",
                     data: {
                         server: $('#servers').val(), database: $('#databases').val(),
-                        key: key, type: type, ttl: $('#ttl').text(), value: changedContent, format: format
+                        key: key, type: type, ttl: $('#ttl').text(), value: changedContent
                     },
                     success: function (content, textStatus, request) {
                         if (content == 'OK') {

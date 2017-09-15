@@ -214,7 +214,7 @@ type ContentResult struct {
 	Format   string // JSON, NORMAL, UNKNOWN
 }
 
-func displayContent(server RedisServer, key string, valType string) *ContentResult {
+func displayContent(server RedisServer, key string) *ContentResult {
 	client := newRedisClient(server)
 	defer client.Close()
 
@@ -237,6 +237,8 @@ func displayContent(server RedisServer, key string, valType string) *ContentResu
 	var format string
 	var err error
 	var size int64
+
+	valType, _ := client.Type(key).Result()
 
 	switch valType {
 	case "string":

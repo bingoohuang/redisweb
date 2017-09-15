@@ -12,6 +12,7 @@ type ConvenientItem struct {
 	Name       string
 	Template   string
 	Operations []string
+	Ttl        string
 }
 
 type ConvenientConfig struct {
@@ -39,14 +40,31 @@ func parseConvenientConfig() ConvenientConfig {
 		}
 
 		section := cfg.Section(sectionName)
-		key, _ := section.GetKey("name")
+		nameKey, _ := section.GetKey("name")
+		name := "Unnamed"
+		if nameKey != nil {
+			name = nameKey.MustString(name)
+		}
+
 		template, _ := section.GetKey("template")
-		operations, _ := section.GetKey("operations")
+		operationsKey, _ := section.GetKey("operations")
+		operations := "save, delete"
+		if operationsKey != nil {
+			operations = operationsKey.MustString(operations)
+		}
+
+		ttlKey, _ := section.GetKey("ttl")
+		ttl := "-1s"
+		if ttlKey != nil {
+			ttl = ttlKey.MustString("-1s")
+		}
+
 		items = append(items, ConvenientItem{
 			Section:    sectionName,
-			Name:       key.MustString("Unnamed"),
+			Name:       name,
 			Template:   template.String(),
-			Operations: strings.Split(operations.MustString("save,delete"), ","),
+			Operations: strings.Split(operations, ","),
+			Ttl:        ttl,
 		})
 	}
 

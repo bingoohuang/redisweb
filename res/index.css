@@ -223,16 +223,36 @@ textarea {
     background: cyan;
 }
 
-.convenientConfigItemEdit div {
+#convenientContent div {
     display: flex;
+    margin-bottom: 10px;
 }
 
-.convenientConfigItemEdit div span:first-child {
+#convenientContent div span:first-child {
     flex: 1;
     text-align: right;
     padding-right: 30px;
 }
 
-.convenientConfigItemEdit div span:last-child {
+#convenientContent div span:last-child {
     flex: 6;
+}
+
+#convenientContent button {
+    width: 150px;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+#convenientContent input {
+    width: 300px;
+}
+
+.itemNames {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+#convenientContent {
+    margin-top: 30px;
 }
