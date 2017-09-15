@@ -28,7 +28,7 @@ body {
     border: 0;
 }
 
-#refreshKeys, #redisTerminal, #checkAllChk, #exportKeys, #filterKeys, #redisImport {
+#refreshKeys, #redisTerminal, #checkAllChk, #exportKeys, #filterKeys, #redisImport, #convenientSpan {
     margin-left: -10px;
 }
 
@@ -110,7 +110,7 @@ p {
 }
 
 #keys ul li span {
-    margin-right: 5px;
+    margin-right: 1px;
 }
 
 #keys ul li.last { /* Hard-coded substitute for :last-child */
@@ -202,8 +202,37 @@ textarea {
 }
 
 .info {
-    margin-left: -4px;
     color: #aaa;
     font-weight: normal;
     font-size: 10px;
+}
+
+.keyValue {
+    font-size: 12px;
+}
+
+.convenientConfigItem {
+    border: 1px solid cyan;
+    margin-right: 10px;
+    border-radius: 20px;
+    font-size: 16px;
+    padding: 0 20px;
+}
+
+.convenientConfigItemSelected {
+    background: cyan;
+}
+
+.convenientConfigItemEdit div {
+    display: flex;
+}
+
+.convenientConfigItemEdit div span:first-child {
+    flex: 1;
+    text-align: right;
+    padding-right: 30px;
+}
+
+.convenientConfigItemEdit div span:last-child {
+    flex: 6;
 }

@@ -31,6 +31,7 @@ var (
 	servers []RedisServer
 
 	maxKeys int
+	convenientConfigFile string
 )
 
 func init() {
@@ -39,6 +40,7 @@ func init() {
 	devModeArg := flag.Bool("devMode", false, "devMode(disable js/css minify)")
 	serversArg := flag.String("servers", "default=localhost:6379", "servers list, eg: Server1=localhost:6379,Server2=password2/localhost:6388/0")
 	maxKeysArg := flag.Int("maxKeys", 1000, "Max keys to be listed(0 means all keys).")
+	convenientConfigFileArg := flag.String("convenientConfigFile", "convenient-config.ini", "convenient-config.ini file path")
 
 	flag.Parse()
 
@@ -47,6 +49,7 @@ func init() {
 	devMode = *devModeArg
 	servers = parseServers(*serversArg)
 	maxKeys = *maxKeysArg
+	convenientConfigFile = *convenientConfigFileArg
 }
 
 func parseServers(serversConfig string) []RedisServer {
@@ -128,6 +131,7 @@ func main() {
 	http.HandleFunc(contextPath+"/redisInfo", gzipWrapper(serveRedisInfo))
 	http.HandleFunc(contextPath+"/redisCli", serveRedisCli)
 	http.HandleFunc(contextPath+"/redisImport", serveRedisImport)
+	http.HandleFunc(contextPath+"/convenientConfig", serveConvenientConfig)
 
 	sport := strconv.Itoa(port)
 	fmt.Println("start to listen at ", sport)

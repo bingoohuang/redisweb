@@ -212,6 +212,77 @@ $(function () {
         })
     })
 
+    var convenientConfig = null
+
+    function parseTemplateVariables(template) {
+        var variables = []
+        var variable = ""
+        var started = false
+        for (var i = 0, len = template.length; i < len; i++) {
+            var char = template[i]
+            if (char == '{') {
+                started = true
+            } else if (started == true && char == '}') {
+                variables.push(variable)
+                started = false
+                variable = ""
+            } else if (started == true) {
+                variable += char
+            }
+        }
+
+        return variables
+    }
+
+    $('#convenientSpan').click(function () {
+        $.ajax({
+            type: 'POST', url: pathname + "/convenientConfig",
+            success: function (result, textStatus, request) {
+                if (result.Ready !== true) {
+                    $('#frame').html('<div><span class="key">' + result.Error + '</span></div>')
+                    return
+                }
+
+                convenientConfig = result
+                var contentHtml = '<div>'
+                for (var i = 0, len = convenientConfig.Items.length; i < len; i++) {
+                    convenientConfigItem = convenientConfig.Items[i]
+                    contentHtml += '<span itemIndex="' + i + '" class="convenientConfigItem">' + convenientConfigItem.Name + '</span>'
+                }
+                contentHtml += '</div><div id="convenientContent"></div>'
+                $('#frame').html(contentHtml)
+
+                $('.convenientConfigItem').click(function () {
+                    $('.convenientConfigItem').removeClass('convenientConfigItemSelected')
+                    var $this = $(this);
+                    $this.addClass('convenientConfigItemSelected')
+                    var item = convenientConfig.Items[+$this.attr('itemIndex')]
+                    var convenientContent = '<p/><div class="convenientConfigItemEdit">' +
+                        '<div><span>Key Template:</span><span>' + item.Template + ' </span></div>'
+
+                    var variables = parseTemplateVariables(item.Template)
+                    for (var i = 0, len = variables.length; i < len; i++) {
+                        convenientContent += '<div class="variables"><span>' + variables[i] + ':</span><span><input placeholder="variable value"></span></div>'
+                    }
+
+                    convenientContent += '<div><span>Key:</span><span></span></div>'
+                    convenientContent += '<div><span>Value:</span><span></span></div>'
+                    convenientContent += '<div><span>Operations:</span><span>'
+                    for (var i = 0, len = item.Operations.length; i < len; i++) {
+                        convenientContent += '<button class="convenientButton">' + item.Operations[i] + "</button>"
+                    }
+                    convenientContent += '</span></div>'
+                    convenientContent += '</div>'
+
+                    $('#convenientContent').html(convenientContent)
+                })
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+            }
+        })
+    })
+
 
     $('#redisInfo').click(function () {
         $.ajax({
@@ -613,5 +684,6 @@ $(function () {
                 return; // exit this handler for other keys
         }
     })
+
 
 })
