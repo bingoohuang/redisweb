@@ -230,15 +230,17 @@ $(function () {
                     }
 
                     convenientContent += '<div><span>Key:</span><span class="keyCreated"></span></div>'
+
                     convenientContent += '<div><span>TTL:</span><span class="ttlCreated"><input value="' + item.Ttl + '"></span></div>'
                     convenientContent += '<div><span>Value:<br/><span class="info"></span></span><span><textarea class="valueTextArea"></textarea></span></div>'
+
                     convenientContent += '<div><span>Operations:</span><span><button class="convenientButton">Refresh Value</button>'
-
-
                     for (var i = 0, len = item.Operations.length; i < len; i++) {
                         convenientContent += '<button class="convenientButton">' + capitalize(item.Operations[i]) + "</button>"
                     }
                     convenientContent += '</span></div>'
+
+                    convenientContent += '<div><span>Result:</span><span class="resultSpan"></span></div>'
 
                     $('#convenientContent').html(convenientContent)
 
@@ -258,7 +260,7 @@ $(function () {
 
                         $('.keyCreated').text(templateValue)
                     }
-                    var refreshValue = function () {
+                    var refreshValue = function (resultTip) {
                         clearConvenientContentInfo()
                         var keyCreated = $('.keyCreated').text()
                         $.ajax({
@@ -267,6 +269,7 @@ $(function () {
                             success: function (result, textStatus, request) {
                                 $(".valueTextArea").val(result.Exists ? result.Content : "(key does not exist)").select()
                                 setConvenientContentInfo(result.Exists && result.Ttl)
+                                $('.resultSpan').text(resultTip || 'Refreshed OK')
                             },
                             error: function (jqXHR, textStatus, errorThrown) {
                                 alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
@@ -280,8 +283,16 @@ $(function () {
                         ttlInterval = null
                         $('#convenientContent').find('.info').text('')
                         $('#convenientContent').find('.valueTextArea').val('(key does not exist)').select()
+                        $('.resultSpan').text('')
                     }
+
+                    var resetConvenientContentInfo = function() {
+                        clearInterval(ttlInterval)
+                        ttlInterval = null
+                    }
+
                     var setConvenientContentInfo = function (info) {
+                        resetConvenientContentInfo()
                         var infoSpan = $('#convenientContent').find('.info')
                         infoSpan.text(info ? '(' + info + ')' : '')
                         if (info) {
@@ -299,7 +310,9 @@ $(function () {
                         }
                     }
 
-                    $('div.variables input').keyup(f).change(f).blur(refreshValue)
+                    $('div.variables input').keyup(f).change(f).blur(function () {
+                        refreshValue(' ')
+                    })
 
                     $('.convenientButton').click(function () {
                         var $this = $(this)
@@ -315,7 +328,7 @@ $(function () {
                                 },
                                 success: function (content, textStatus, request) {
                                     setConvenientContentInfo(content == 'OK' && ttl)
-                                    alert(content)
+                                    $('.resultSpan').text('Saved ' + content)
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
                                     alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
@@ -327,9 +340,10 @@ $(function () {
                                 data: {server: $('#servers').val(), database: $('#databases').val(), key: keyCreated},
                                 success: function (content, textStatus, request) {
                                     if (content == 'OK') {
-                                        refreshValue()
+                                        refreshValue('Deleted OK')
+                                    } else {
+                                        $('.resultSpan').text('Deleted ' + content)
                                     }
-                                    alert(content)
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
                                     alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
@@ -345,7 +359,7 @@ $(function () {
                 alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
             }
         })
-    })
+    }).click()
 
 
     $('#redisInfo').click(function () {

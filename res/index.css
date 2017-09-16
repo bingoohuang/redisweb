@@ -229,13 +229,13 @@ textarea {
 }
 
 #convenientContent div span:first-child {
-    flex: 1;
+    flex: 2;
     text-align: right;
     padding-right: 30px;
 }
 
 #convenientContent div span:last-child {
-    flex: 6;
+    flex: 10;
 }
 
 #convenientContent button {
