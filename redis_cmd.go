@@ -196,11 +196,11 @@ func deleteMultiKeys(server RedisServer, keys ...string) string {
 	client := newRedisClient(server)
 	defer client.Close()
 
-	ok, err := client.Del(keys...).Result()
-	if ok > 0 {
-		return "OK"
-	} else {
+	_, err := client.Del(keys...).Result()
+	if err != nil {
 		return err.Error()
+	} else {
+		return "OK"
 	}
 }
 

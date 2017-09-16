@@ -30,7 +30,7 @@ var (
 	devMode bool // to disable css/js minify
 	servers []RedisServer
 
-	maxKeys int
+	maxKeys              int
 	convenientConfigFile string
 )
 

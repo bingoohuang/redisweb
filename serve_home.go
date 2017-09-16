@@ -89,7 +89,7 @@ func mergeCss() string {
 
 func mergeScripts() string {
 	return mergeStatic("jquery-3.2.1.min.js", "codemirror-5.29.0.min.js", "matchbrackets-5.29.0.min.js",
-		"javascript-5.29.0.min.js", "autosize-4.0.0.min.js", "js.cookie.js", "index.js", "resizebar.js")
+		"javascript-5.29.0.min.js", "autosize-4.0.0.min.js", "js.cookie.js", "utils.js", "index.js", "resizebar.js")
 }
 
 func mergeStatic(statics ...string) string {

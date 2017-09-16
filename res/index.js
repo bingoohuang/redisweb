@@ -125,11 +125,11 @@ $(function () {
                 keys.push(key)
             }
         })
-        return keys;
+        return keys
     }
 
     $('#deleteCheckedKeys').click(function () {
-        var keys = findCheckedKeys();
+        var keys = findCheckedKeys()
         if (keys.length == 0) {
             alert("No keys chosen to be deleted!")
             return
@@ -157,22 +157,6 @@ $(function () {
             }
         })
     })
-
-    function joinKeysWithNo(keys) {
-        var result = []
-        var length = keys.length;
-        var lengthSize = ('' + length).length
-        for (var i = 0; i < length; ++i) {
-            result.push(pad(i + 1, lengthSize) + '.&nbsp;' + keys[i] + '<br>')
-        }
-        return result.join('')
-    }
-
-    function pad(n, width, z) {
-        z = z || '0'
-        n = n + ''
-        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n
-    }
 
     function executeRedisCmd() {
         var cmd = $('#directCmd').text()
@@ -214,26 +198,6 @@ $(function () {
 
     var convenientConfig = null
 
-    function parseTemplateVariables(template) {
-        var variables = []
-        var variable = ""
-        var started = false
-        for (var i = 0, len = template.length; i < len; i++) {
-            var char = template[i]
-            if (char == '{') {
-                started = true
-            } else if (started == true && char == '}') {
-                variables.push(variable)
-                started = false
-                variable = ""
-            } else if (started == true) {
-                variable += char
-            }
-        }
-
-        return variables
-    }
-
     $('#convenientSpan').click(function () {
         $.ajax({
             type: 'POST', url: pathname + "/convenientConfig",
@@ -254,7 +218,7 @@ $(function () {
 
                 $('.convenientConfigItem').click(function () {
                     $('.convenientConfigItem').removeClass('convenientConfigItemSelected')
-                    var $this = $(this);
+                    var $this = $(this)
                     $this.addClass('convenientConfigItemSelected')
                     var item = convenientConfig.Items[+$this.attr('itemIndex')]
                     var convenientContent =
@@ -267,10 +231,12 @@ $(function () {
 
                     convenientContent += '<div><span>Key:</span><span class="keyCreated"></span></div>'
                     convenientContent += '<div><span>TTL:</span><span class="ttlCreated"><input value="' + item.Ttl + '"></span></div>'
-                    convenientContent += '<div><span>Value:</span><span><textarea class="valueTextArea"></textarea></span></div>'
-                    convenientContent += '<div><span>Operations:</span><span><button class="convenientButton">refresh value</button>'
+                    convenientContent += '<div><span>Value:<br/><span class="info"></span></span><span><textarea class="valueTextArea"></textarea></span></div>'
+                    convenientContent += '<div><span>Operations:</span><span><button class="convenientButton">Refresh Value</button>'
+
+
                     for (var i = 0, len = item.Operations.length; i < len; i++) {
-                        convenientContent += '<button class="convenientButton">' + item.Operations[i] + "</button>"
+                        convenientContent += '<button class="convenientButton">' + capitalize(item.Operations[i]) + "</button>"
                     }
                     convenientContent += '</span></div>'
 
@@ -291,41 +257,71 @@ $(function () {
                         })
 
                         $('.keyCreated').text(templateValue)
-                    };
+                    }
                     var refreshValue = function () {
+                        clearConvenientContentInfo()
                         var keyCreated = $('.keyCreated').text()
                         $.ajax({
                             type: 'GET', url: pathname + "/showContent",
                             data: {server: $('#servers').val(), database: $('#databases').val(), key: keyCreated},
                             success: function (result, textStatus, request) {
-                                $(".valueTextArea").val(result.Exists ? result.Content : "(not exists)").select()
+                                $(".valueTextArea").val(result.Exists ? result.Content : "(key does not exist)").select()
+                                setConvenientContentInfo(result.Exists && result.Ttl)
                             },
                             error: function (jqXHR, textStatus, errorThrown) {
                                 alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                             }
                         })
-                    };
+                    }
+
+                    var ttlInterval = null
+                    var clearConvenientContentInfo = function() {
+                        clearInterval(ttlInterval)
+                        ttlInterval = null
+                        $('#convenientContent').find('.info').text('')
+                        $('#convenientContent').find('.valueTextArea').val('(key does not exist)').select()
+                    }
+                    var setConvenientContentInfo = function (info) {
+                        var infoSpan = $('#convenientContent').find('.info')
+                        infoSpan.text(info ? '(' + info + ')' : '')
+                        if (info) {
+                            var seconds = parseDuration(info)
+                            if (seconds > 0) {
+                                ttlInterval = setInterval(function () {
+                                    seconds -= 1
+                                    if (seconds > 0) {
+                                        infoSpan.text('(' + createDuration(seconds) + ')')
+                                    } else {
+                                        clearConvenientContentInfo()
+                                    }
+                                }, 1000)
+                            }
+                        }
+                    }
+
                     $('div.variables input').keyup(f).change(f).blur(refreshValue)
 
                     $('.convenientButton').click(function () {
                         var $this = $(this)
                         var keyCreated = $('.keyCreated').text()
-                        if ($this.text() == 'save') {
+                        if ($this.text() == 'Save') {
+                            var ttl = $('.ttlCreated input').val()
                             $.ajax({
                                 type: 'POST', url: pathname + "/changeContent",
                                 data: {
                                     server: $('#servers').val(), database: $('#databases').val(),
-                                    key: keyCreated, type: 'string', ttl: $('.ttlCreated input').val(),
+                                    key: keyCreated, type: 'string', ttl: ttl,
                                     value: JSON.stringify($(".valueTextArea").val())
                                 },
                                 success: function (content, textStatus, request) {
+                                    setConvenientContentInfo(content == 'OK' && ttl)
                                     alert(content)
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
                                     alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                                 }
                             })
-                        } else if ($this.text() == 'delete') {
+                        } else if ($this.text() == 'Delete') {
                             $.ajax({
                                 type: 'POST', url: pathname + "/deleteKey",
                                 data: {server: $('#servers').val(), database: $('#databases').val(), key: keyCreated},
@@ -339,7 +335,7 @@ $(function () {
                                     alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                                 }
                             })
-                        } else if ($this.text() == 'refresh value') {
+                        } else if ($this.text() == 'Refresh Value') {
                             refreshValue()
                         }
                     })
@@ -390,7 +386,7 @@ $(function () {
 
         $('#keys ul li span.keyValue').click(function () {
             $('#keys ul li').removeClass('chosen')
-            var $li = $(this).parent('li');
+            var $li = $(this).parent('li')
             $li.addClass('chosen')
             var key = $li.find('.keyValue').text()
             var type = $li.attr('data-type')
@@ -521,7 +517,7 @@ $(function () {
             })
         }
 
-        return JSON.stringify(value);
+        return JSON.stringify(value)
     }
 
     $('#addKey').click(function () {
@@ -587,7 +583,7 @@ $(function () {
             var key = $('#key').val()
             var ttl = $('#ttl').val()
             var format = $('#format').val()
-            var jsonValue = extractValue(type);
+            var jsonValue = extractValue(type)
 
             if (confirm("Are you sure to save save for " + key + "?")) {
                 $.ajax({
@@ -730,7 +726,7 @@ $(function () {
     })
 
     $(document).keydown(function (e) {
-        var which = e.which;
+        var which = e.which
         switch (which) {
             case 37: // left
             case 38: // up
@@ -747,9 +743,9 @@ $(function () {
                     })
 
                 }
-                break;
+                break
             default:
-                return; // exit this handler for other keys
+                return // exit this handler for other keys
         }
     })
 
