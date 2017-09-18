@@ -30,3 +30,4 @@ Usage of ./go-redis-web:
 ![image](https://user-images.githubusercontent.com/1940588/30140624-8b8e3b30-93a8-11e7-98fe-e09e79b91498.png)
 ![image](https://user-images.githubusercontent.com/1940588/30140641-a8b0c386-93a8-11e7-8d30-77a99eda6bfb.png)
 ![image](https://user-images.githubusercontent.com/1940588/30145525-68e4e82e-93c4-11e7-902b-18911786b05f.png)
+![image](https://user-images.githubusercontent.com/1940588/30526969-cfb90608-9be8-11e7-8c78-e346a5a7c949.png)
