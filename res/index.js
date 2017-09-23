@@ -213,6 +213,7 @@ $(function () {
                     convenientConfigItem = convenientConfig.Items[i]
                     contentHtml += '<span itemIndex="' + i + '" class="convenientConfigItem">' + convenientConfigItem.Name + '</span>'
                 }
+                contentHtml += '<span class="convenientConfigItem">New Item</span>'
                 contentHtml += '</div><div id="convenientContent"></div>'
                 $('#frame').html(contentHtml)
 
@@ -220,6 +221,48 @@ $(function () {
                     $('.convenientConfigItem').removeClass('convenientConfigItemSelected')
                     var $this = $(this)
                     $this.addClass('convenientConfigItemSelected')
+
+                    var $convenientContent = $('#convenientContent');
+                    if ($this.text() == 'New Item') {
+                        var convenientContent =
+                            '<div><span>Name:</span><span><input class="templateName"></span></div>' +
+                            '<div><span>Key Template:</span><span><input class="templateValue"></span></div>' +
+                            '<div><span>TTL:</span><span><input class="ttlCreated" value="-1s"></span></div>' +
+                            '<div><span>Operations:</span><span><input style="width:12px" type="checkbox" id="DeleteChk" value="Delete" checked><label for="DeleteChk">Delete</label>' +
+                            '<input  style="width:12px" type="checkbox" id="SaveChk" value="Save" checked><label for="SaveChk">Save</label></span></div>' +
+                            '<div><span>&nbsp;</span><span><button>Save New Item</button></span></div>'
+                        $convenientContent.html(convenientContent)
+                        $convenientContent.find('button').click(function () {
+                            var operations = ''
+                            $convenientContent.find('input:checked').each(function (index, chk) {
+                                if (operations.length > 0) operations += ','
+                                operations += $(chk).val()
+                            })
+                            $.ajax({
+                                type: 'GET', url: pathname + "/convenientConfigAdd",
+                                data: {
+                                    name: $convenientContent.find('input.templateName').val(),
+                                    template:$convenientContent.find('input.templateValue').val(),
+                                    operations:operations,
+                                    ttl:$convenientContent.find('input.ttlCreated').val()
+                                },
+                                success: function (result, textStatus, request) {
+                                   if (result.Message == 'OK') {
+                                       var newSection = result.Section
+                                       $('#convenientSpan').click()
+                                   } else {
+                                       alert(result.Message)
+                                   }
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                                }
+                            })
+                        })
+
+                        return
+                    }
+
                     var item = convenientConfig.Items[+$this.attr('itemIndex')]
                     var convenientContent =
                         '<div><span>Key Template:</span><span class="templateValue">' + item.Template + ' </span></div>'
@@ -242,7 +285,7 @@ $(function () {
 
                     convenientContent += '<div><span>Result:</span><span class="resultSpan"></span></div>'
 
-                    $('#convenientContent').html(convenientContent)
+                    $convenientContent.html(convenientContent)
 
                     $(".valueTextArea").focus(function () {
                         $(this).select()
@@ -278,7 +321,7 @@ $(function () {
                     }
 
                     var ttlInterval = null
-                    var clearConvenientContentInfo = function() {
+                    var clearConvenientContentInfo = function () {
                         clearInterval(ttlInterval)
                         ttlInterval = null
                         $('#convenientContent').find('.info').text('')
@@ -286,7 +329,7 @@ $(function () {
                         $('.resultSpan').text('')
                     }
 
-                    var resetConvenientContentInfo = function() {
+                    var resetConvenientContentInfo = function () {
                         clearInterval(ttlInterval)
                         ttlInterval = null
                     }
