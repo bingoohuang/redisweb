@@ -5,6 +5,7 @@ import (
 	"github.com/go-ini/ini"
 	"math/rand"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -24,6 +25,11 @@ type ConvenientConfig struct {
 }
 
 func convenientConfigNew(name, template, operations, ttl string) (string, string) {
+	err := createIniFileIfNotExists()
+	if err != nil {
+		return "", err.Error()
+	}
+
 	cfg, err := ini.Load(convenientConfigFile)
 	if err != nil {
 		return "", err.Error()
@@ -77,6 +83,14 @@ func RandStringBytesMaskImprSrc(n int) string {
 
 func parseConvenientConfig() ConvenientConfig {
 	items := make([]ConvenientItem, 0)
+	err := createIniFileIfNotExists()
+	if err != nil {
+		return ConvenientConfig{
+			Ready: false,
+			Error: err.Error(),
+			Items: items,
+		}
+	}
 
 	cfg, err := ini.Load(convenientConfigFile)
 	if err != nil {
@@ -127,6 +141,14 @@ func parseConvenientConfig() ConvenientConfig {
 		Error: "",
 		Items: items,
 	}
+}
+func createIniFileIfNotExists() error {
+	file, err := os.OpenFile(convenientConfigFile, os.O_RDONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	file.Close()
+	return nil
 }
 
 func serveConvenientConfigRead(w http.ResponseWriter, req *http.Request) {
