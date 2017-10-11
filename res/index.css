@@ -262,3 +262,7 @@ textarea {
 #convenientContent {
     margin-top: 30px;
 }
+
+#serversMaintain input {
+    width: 300px;
+}

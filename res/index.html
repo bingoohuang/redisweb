@@ -12,7 +12,8 @@
 
 <div id="sidebar">
     <div class="operationArea">
-        <i title="maintain redis servers" class="sprite sprite-redis"></i><select id="servers">
+        <i id="maintainRedisServers" title="maintain redis servers" class="sprite sprite-redis"></i><select
+            id="servers">
         <serverOptions/>
     </select>
         db:<select id="databases">
@@ -26,6 +27,18 @@
         <input id="serverFilterKeys" placeholder="Filter keys from server">
         <button id="serverFilterKeysBtn">Filter!</button>
     </div>
+
+
+    <div id="serversMaintain" style="display:none;">
+        <div>Add a new redis server</div>
+        <div><span>Server Name:</span><span><input placeholder="Input Redis Server Name"></span></div>
+        <div><span>Server Addr:</span><span><input placeholder="Input Redis Server Address"></span></div>
+        <div><span>Server Port:</span><span><input value="6379"></span></div>
+        <div>
+            <button>Add</button>
+        </div>
+    </div>
+
     <div>
         <span class="sprite sprite-folder-open"></span>
         <span id="keysLabel">Keys</span>
@@ -41,7 +54,9 @@
 </div>
 <div id="resize"></div>
 <div id="frame"></div>
+
 <script>
+
     /*.SCRIPT*/
 </script>
 </body>

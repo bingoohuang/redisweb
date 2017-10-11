@@ -771,6 +771,11 @@ $(function () {
             }
         })
     }
+    
+    
+    $('#maintainRedisServers').click(function (e) {
+        $('#serversMaintain').modal()
+    })
 
     var keysFocused = false
 

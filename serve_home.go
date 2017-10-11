@@ -84,12 +84,12 @@ func serverOptions() string {
 }
 
 func mergeCss() string {
-	return mergeStatic("stylesheet.css", "codemirror-5.29.0.min.css", "index.css")
+	return mergeStatic("stylesheet.css", "codemirror-5.29.0.min.css", "jquery.modal-0.8.2.min.css", "index.css")
 }
 
 func mergeScripts() string {
 	return mergeStatic("jquery-3.2.1.min.js", "codemirror-5.29.0.min.js", "matchbrackets-5.29.0.min.js",
-		"javascript-5.29.0.min.js", "autosize-4.0.0.min.js", "js.cookie.js", "utils.js", "index.js", "resizebar.js")
+		"javascript-5.29.0.min.js", "autosize-4.0.0.min.js", "js.cookie.js", "utils.js", "jquery.modal-0.8.2.min.js", "index.js", "resizebar.js")
 }
 
 func mergeStatic(statics ...string) string {
