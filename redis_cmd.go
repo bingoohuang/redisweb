@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/go-redis/redis"
+	"log"
 	"strconv"
 	"time"
 	"unicode"
@@ -29,7 +30,12 @@ func configGetDatabases(server RedisServer) int {
 	client := newRedisClient(server)
 	defer client.Close()
 
-	config, _ := client.ConfigGet("databases").Result()
+	config, err := client.ConfigGet("databases").Result()
+	if err != nil {
+		log.Println("config get databases error: ", err.Error())
+		return 0
+	}
+
 	databaseNum, _ := strconv.Atoi(config[1].(string))
 	return databaseNum
 }
