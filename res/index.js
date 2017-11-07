@@ -301,7 +301,7 @@ $(function () {
                             templateValue = templateValue.replace("{" + variableName + "}", variableValue)
                         })
 
-                        $('.keyCreated').text(templateValue).click(function() {
+                        $('.keyCreated').text(templateValue).unbind('click').click(function() {
                             showContentAjax(templateValue)
                         })
                     }
