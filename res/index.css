@@ -266,3 +266,9 @@ textarea {
 #serversMaintain input {
     width: 300px;
 }
+
+.keyCreated {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}

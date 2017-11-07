@@ -242,17 +242,16 @@ $(function () {
                                 type: 'GET', url: pathname + "/convenientConfigAdd",
                                 data: {
                                     name: $convenientContent.find('input.templateName').val(),
-                                    template:$convenientContent.find('input.templateValue').val(),
-                                    operations:operations,
-                                    ttl:$convenientContent.find('input.ttlCreated').val()
+                                    template: $convenientContent.find('input.templateValue').val(),
+                                    operations: operations,
+                                    ttl: $convenientContent.find('input.ttlCreated').val()
                                 },
                                 success: function (result, textStatus, request) {
-                                   if (result.Message == 'OK') {
-                                       var newSection = result.Section
-                                       $('#convenientSpan').click()
-                                   } else {
-                                       alert(result.Message)
-                                   }
+                                    if (result.Message == 'OK') {
+                                        $('#convenientSpan').click()
+                                    } else {
+                                        alert(result.Message)
+                                    }
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
                                     alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
@@ -281,6 +280,7 @@ $(function () {
                     for (var i = 0, len = item.Operations.length; i < len; i++) {
                         convenientContent += '<button class="convenientButton">' + capitalize(item.Operations[i]) + "</button>"
                     }
+                    convenientContent += '<button class="convenientButton" sectionName="' + item.Section + '">Delete This Item</button>'
                     convenientContent += '</span></div>'
 
                     convenientContent += '<div><span>Result:</span><span class="resultSpan"></span></div>'
@@ -291,7 +291,7 @@ $(function () {
                         $(this).select()
                     })
 
-                    var f = function () {
+                    var instantiateTemplate = function () {
                         var templateValue = $('span.templateValue').text()
                         $('div.variables').each(function (index, div) {
                             var $div = $(div)
@@ -301,7 +301,9 @@ $(function () {
                             templateValue = templateValue.replace("{" + variableName + "}", variableValue)
                         })
 
-                        $('.keyCreated').text(templateValue)
+                        $('.keyCreated').text(templateValue).click(function() {
+                            showContentAjax(templateValue)
+                        })
                     }
                     var refreshValue = function (resultTip) {
                         clearConvenientContentInfo()
@@ -353,7 +355,7 @@ $(function () {
                         }
                     }
 
-                    $('div.variables input').keyup(f).change(f).blur(function () {
+                    $('div.variables input').keyup(instantiateTemplate).change(instantiateTemplate).blur(function () {
                         refreshValue(' ')
                     })
 
@@ -394,6 +396,19 @@ $(function () {
                             })
                         } else if ($this.text() == 'Refresh Value') {
                             refreshValue()
+                        } else if ($this.text() == 'Delete This Item') {
+                            $.ajax({
+                                type: 'POST', url: pathname + "/deleteConvenientConfigItem",
+                                data: {
+                                    sectionName: $this.attr('sectionName')
+                                },
+                                success: function (content, textStatus, request) {
+                                    $('#convenientSpan').click()
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                                }
+                            })
                         }
                     })
                 }).first().click()
@@ -422,6 +437,19 @@ $(function () {
         })
     })
 
+    function showContentAjax(key) {
+        $.ajax({
+            type: 'GET', url: pathname + "/showContent",
+            data: {server: $('#servers').val(), database: $('#databases').val(), key: key},
+            success: function (result, textStatus, request) {
+                showContent(key, result.Type, result.Content, result.Ttl, result.Size, result.Encoding, result.Error, result.Exists, result.Format)
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+            }
+        })
+    }
+
     function showKeysTree(keysArray) {
         $('#keysNum').html('(' + keysArray.length + ')')
 
@@ -446,17 +474,7 @@ $(function () {
             var $li = $(this).parent('li')
             $li.addClass('chosen')
             var key = $li.find('.keyValue').text()
-            var type = $li.attr('data-type')
-            $.ajax({
-                type: 'GET', url: pathname + "/showContent",
-                data: {server: $('#servers').val(), database: $('#databases').val(), key: key},
-                success: function (result, textStatus, request) {
-                    showContent(key, type, result.Content, result.Ttl, result.Size, result.Encoding, result.Error, result.Exists, result.Format)
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
-                }
-            })
+            showContentAjax(key)
         })
 
         toggleFilterKeys()
@@ -509,18 +527,6 @@ $(function () {
 
     $('#servers,#databases').change(refreshKeys)
 
-    function showContentAjax(key, type) {
-        $.ajax({
-            type: 'GET', url: pathname + "/showContent",
-            data: {server: $('#servers').val(), database: $('#databases').val(), key: key},
-            success: function (result, textStatus, request) {
-                showContent(key, type, result.Content, result.Ttl, result.Size, result.Encoding, result.Error, result.Exists, result.Format)
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
-            }
-        })
-    }
 
     function addMoreRows(type) {
         var rows = $('tr.' + type)
@@ -652,7 +658,7 @@ $(function () {
                     success: function (content, textStatus, request) {
                         if (content == 'OK') {
                             refreshKeys(key)
-                            showContentAjax(key, type)
+                            showContentAjax(key)
                         } else {
                             alert(content)
                         }
@@ -759,7 +765,7 @@ $(function () {
                     },
                     success: function (content, textStatus, request) {
                         if (content == 'OK') {
-                            showContentAjax(key, type)
+                            showContentAjax(key)
                         } else {
                             alert(content)
                         }
@@ -771,8 +777,8 @@ $(function () {
             }
         })
     }
-    
-    
+
+
     $('#maintainRedisServers').click(function (e) {
         $('#serversMaintain').modal()
     })
@@ -803,7 +809,6 @@ $(function () {
                             return false
                         }
                     })
-
                 }
                 break
             default:
@@ -811,7 +816,7 @@ $(function () {
         }
     })
 
-    $(document).on('paste','[contenteditable]', function(e) {
+    $(document).on('paste', '[contenteditable]', function (e) {
         e.preventDefault();
         var text = '';
         if (e.clipboardData || e.originalEvent.clipboardData) {

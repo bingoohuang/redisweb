@@ -81,6 +81,24 @@ func RandStringBytesMaskImprSrc(n int) string {
 	return string(b)
 }
 
+func deleteConvenientConfigItem(sectionName string) error {
+	err := createIniFileIfNotExists()
+	if err != nil {
+		return err
+	}
+
+	cfg, err := ini.Load(convenientConfigFile)
+	if err != nil {
+		return err
+	}
+
+	cfg.DeleteSection(sectionName)
+
+	err = cfg.SaveTo(convenientConfigFile)
+
+	return err
+}
+
 func parseConvenientConfig() ConvenientConfig {
 	items := make([]ConvenientItem, 0)
 	err := createIniFileIfNotExists()
@@ -156,6 +174,11 @@ func serveConvenientConfigRead(w http.ResponseWriter, req *http.Request) {
 
 	config := parseConvenientConfig()
 	json.NewEncoder(w).Encode(config)
+}
+
+func serveDeleteConvenientConfigItem(w http.ResponseWriter, req *http.Request) {
+	sectionName := strings.TrimSpace(req.FormValue("sectionName"))
+	deleteConvenientConfigItem(sectionName)
 }
 
 func serveConvenientConfigAdd(w http.ResponseWriter, req *http.Request) {

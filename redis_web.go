@@ -133,6 +133,7 @@ func main() {
 	http.HandleFunc(contextPath+"/redisImport", serveRedisImport)
 	http.HandleFunc(contextPath+"/convenientConfig", serveConvenientConfigRead)
 	http.HandleFunc(contextPath+"/convenientConfigAdd", serveConvenientConfigAdd)
+	http.HandleFunc(contextPath+"/deleteConvenientConfigItem", serveDeleteConvenientConfigItem)
 
 	sport := strconv.Itoa(port)
 	fmt.Println("start to listen at ", sport)

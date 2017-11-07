@@ -218,6 +218,7 @@ type ContentResult struct {
 	Size     int64
 	Error    string
 	Format   string // JSON, NORMAL, UNKNOWN
+	Type     string
 }
 
 func displayContent(server RedisServer, key string) *ContentResult {
@@ -233,6 +234,8 @@ func displayContent(server RedisServer, key string) *ContentResult {
 			Encoding: "",
 			Size:     0,
 			Error:    "",
+			Format:   "",
+			Type:     "",
 		}
 	}
 
@@ -283,6 +286,7 @@ func displayContent(server RedisServer, key string) *ContentResult {
 		Size:     size,
 		Error:    errorMessage,
 		Format:   format,
+		Type:     valType,
 	}
 }
 func parseHashContent(m map[string]string) map[string]string {
