@@ -22,7 +22,9 @@ $(function () {
 
     $('#serverFilterKeysBtn,#refreshKeys').click(function () {
         refreshKeys()
-    }).click()
+    })
+
+    refreshKeys()
 
     $('#serverFilterKeys').keydown(function (event) {
         var keyCode = event.keyCode || event.which
