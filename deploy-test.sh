@@ -12,7 +12,7 @@ cd ./app/go-redis-web/
 ps -ef|grep go-redis-web|grep -v grep|awk '{print \$2}'|xargs -r kill -9
 rm go-redis-web.linux.bin
 bzip2 -d go-redis-web.linux.bin.bz2
-nohup ./go-redis-web.linux.bin -servers=127.0.0.1:8051 > go-redis-web.out 2>&1 &
+nohup ./go-redis-web.linux.bin -servers=127.0.0.1:8051 -devMode=true > go-redis-web.out 2>&1 &
 exit
 eeooff
 

@@ -15,7 +15,7 @@ $(function () {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                alert("1." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
             }
         })
     }
@@ -24,7 +24,6 @@ $(function () {
         refreshKeys()
     })
 
-    refreshKeys()
 
     $('#serverFilterKeys').keydown(function (event) {
         var keyCode = event.keyCode || event.which
@@ -53,7 +52,7 @@ $(function () {
                     $('#importResult').html('<pre>' + content + '</pre>')
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                    alert("2." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                 }
             })
         })
@@ -78,7 +77,7 @@ $(function () {
         $('#exportBtn,#downloadExportBtn').click(function () {
             var keys = findCheckedKeys()
             if (keys.length == 0) {
-                alert("No keys chosen to be deleted!")
+                alert("3." + "No keys chosen to be deleted!")
                 return
             }
             var exportType = $('#exportType').val()
@@ -111,7 +110,7 @@ $(function () {
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                    alert("4." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                 }
             })
 
@@ -133,7 +132,7 @@ $(function () {
     $('#deleteCheckedKeys').click(function () {
         var keys = findCheckedKeys()
         if (keys.length == 0) {
-            alert("No keys chosen to be deleted!")
+            alert("5." + "No keys chosen to be deleted!")
             return
         }
 
@@ -146,7 +145,7 @@ $(function () {
             data: {server: $('#servers').val(), database: $('#databases').val(), keys: JSON.stringify(keys)},
             success: function (content, textStatus, request) {
                 if (content != 'OK') {
-                    alert(content)
+                    alert("6." + content)
                 } else {
                     removeKeys(keys)
                     $('#checkAllChk').prop('checked', false)
@@ -155,7 +154,7 @@ $(function () {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                alert("7." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
             }
         })
     })
@@ -178,7 +177,7 @@ $(function () {
                 }, 0)
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                alert("8." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
             }
         })
     }
@@ -224,7 +223,7 @@ $(function () {
                     var $this = $(this)
                     $this.addClass('convenientConfigItemSelected')
 
-                    var $convenientContent = $('#convenientContent');
+                    var $convenientContent = $('#convenientContent')
                     if ($this.text() == 'New Item') {
                         var convenientContent =
                             '<div><span>Name:</span><span><input class="templateName"></span></div>' +
@@ -252,11 +251,11 @@ $(function () {
                                     if (result.Message == 'OK') {
                                         $('#convenientSpan').click()
                                     } else {
-                                        alert(result.Message)
+                                        alert("9." + result.Message)
                                     }
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
-                                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                                    alert("10." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                                 }
                             })
                         })
@@ -319,7 +318,7 @@ $(function () {
                                 $('.resultSpan').text(resultTip || 'Refreshed OK')
                             },
                             error: function (jqXHR, textStatus, errorThrown) {
-                                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                                alert("11." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                             }
                         })
                     }
@@ -378,7 +377,7 @@ $(function () {
                                     $('.resultSpan').text('Saved ' + content)
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
-                                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                                    alert("12." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                                 }
                             })
                         } else if ($this.text() == 'Delete') {
@@ -393,7 +392,7 @@ $(function () {
                                     }
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
-                                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                                    alert("13." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                                 }
                             })
                         } else if ($this.text() == 'Refresh Value') {
@@ -408,7 +407,7 @@ $(function () {
                                     $('#convenientSpan').click()
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
-                                    alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                                    alert("14." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                                 }
                             })
                         }
@@ -416,7 +415,7 @@ $(function () {
                 }).first().click()
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                alert("15." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
             }
         })
     }).click()
@@ -434,7 +433,7 @@ $(function () {
                 $('#frame').html(contentHtml)
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                alert("16." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
             }
         })
     })
@@ -447,7 +446,7 @@ $(function () {
                 showContent(key, result.Type, result.Content, result.Ttl, result.Size, result.Encoding, result.Error, result.Exists, result.Format)
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                alert("17." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
             }
         })
     }
@@ -662,11 +661,11 @@ $(function () {
                             refreshKeys(key)
                             showContentAjax(key)
                         } else {
-                            alert(content)
+                            alert("18." + content)
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
-                        alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                        alert("19." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                     }
                 })
             }
@@ -743,14 +742,14 @@ $(function () {
                     data: {server: $('#servers').val(), database: $('#databases').val(), key: key},
                     success: function (content, textStatus, request) {
                         if (content != 'OK') {
-                            alert(content)
+                            alert("20." + content)
                         } else {
                             removeKey(key)
                             $('#frame').html('<div><span class="key">' + key + ' was deleted</span></div>')
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
-                        alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                        alert("21." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                     }
                 })
             }
@@ -769,11 +768,11 @@ $(function () {
                         if (content == 'OK') {
                             showContentAjax(key)
                         } else {
-                            alert(content)
+                            alert("22." + content)
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
-                        alert(jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
+                        alert("23." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
                     }
                 })
             }
@@ -819,18 +818,25 @@ $(function () {
     })
 
     $(document).on('paste', '[contenteditable]', function (e) {
-        e.preventDefault();
-        var text = '';
+        e.preventDefault()
+        var text = ''
         if (e.clipboardData || e.originalEvent.clipboardData) {
-            text = (e.originalEvent || e).clipboardData.getData('text/plain');
+            text = (e.originalEvent || e).clipboardData.getData('text/plain')
         } else if (window.clipboardData) {
-            text = window.clipboardData.getData('Text');
+            text = window.clipboardData.getData('Text')
         }
         if (document.queryCommandSupported('insertText')) {
-            document.execCommand('insertText', false, text);
+            document.execCommand('insertText', false, text)
         } else {
-            document.execCommand('paste', false, text);
+            document.execCommand('paste', false, text)
         }
-    });
+    })
 
+    var windowAlert = window.alert
+
+    window.alert = function(msg) {
+       if (msg) windowAlert(msg)
+    }
+
+    refreshKeys()
 })
