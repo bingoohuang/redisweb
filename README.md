@@ -5,7 +5,8 @@ redis web admin based on go lang
 1. `go get -u github.com/jteeuwen/go-bindata/...`
 2. `go get golang.org/x/tools/cmd/goimports`
 3. `./gobin.sh & go build` 
-5. build for linux :`env GOOS=linux GOARCH=amd64 go build -o go-redis-web.linux.bin`
+5. build for linux:`env GOOS=linux GOARCH=amd64 go build -o go-redis-web.linux.bin`
+6. or build for windows 64bit: `env GOOS=windows GOARCH=amd64 go build`
 
 # startup
 ```
