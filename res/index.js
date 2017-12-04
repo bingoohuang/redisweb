@@ -726,6 +726,23 @@ $(function () {
             addMoreRows(type)
         })
 
+        var showContentTtlInterval = null
+
+        var seconds = parseDuration(ttl)
+        if (seconds > 0) {
+            var ttlTd = $('#ttl')
+            showContentTtlInterval = setInterval(function () {
+                seconds -= 1
+                if (seconds > 0) {
+                    ttlTd.text(createDuration(seconds))
+                } else {
+                    ttlTd.text(0)
+                    showContentTtlInterval = null
+                }
+            }, 1000)
+        }
+
+
         codeMirror = null
         if (format === "JSON" && size < 5000) {
             codeMirror = CodeMirror.fromTextArea(document.getElementById('code'), {
