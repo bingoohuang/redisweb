@@ -14,6 +14,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"github.com/skratchdot/open-golang/open"
+	"runtime"
+	"time"
 )
 
 type RedisServer struct {
@@ -137,8 +140,20 @@ func main() {
 
 	sport := strconv.Itoa(port)
 	fmt.Println("start to listen at ", sport)
+	go openExplorer(sport)
 	if err := http.ListenAndServe(":"+sport, nil); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func openExplorer(port string) {
+	time.Sleep(100 * time.Millisecond)
+
+	switch runtime.GOOS {
+	case "windows":
+		fallthrough
+	case "darwin":
+		open.Run("http://127.0.0.1:" + port)
 	}
 }
 
