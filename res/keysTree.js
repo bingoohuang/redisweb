@@ -5,7 +5,7 @@ $(function () {
             data: {server: $('#servers').val(), database: $('#databases').val(), pattern: $('#serverFilterKeys').val()},
             success: function (content, textStatus, request) {
                 showKeysTree(content)
-                if (key) {
+                if (typeof key === 'string' || key instanceof String) {
                     chosenKey(key)
                 }
             },
@@ -15,19 +15,13 @@ $(function () {
         })
     }
 
-
-    $('#serverFilterKeysBtn,#refreshKeys').click(function () {
-        refreshKeys()
-    })
-
-
+    $('#serverFilterKeysBtn,#refreshKeys').click(refreshKeys)
     $('#serverFilterKeys').keydown(function (event) {
         var keyCode = event.keyCode || event.which
         if (keyCode == 13) {
             refreshKeys()
         }
     })
-
 
     $('#checkAllChk').click(function () {
         var checked = $('#checkAllChk').is(":checked")
@@ -38,10 +32,7 @@ $(function () {
 
     refreshKeys()
 
-    $('#servers,#databases').change(refreshKeys)
-
     $.refreshKeys = refreshKeys
-
 
     function showKeysTree(keysArray) {
         $('#keysNum').html('(' + keysArray.length + ')')

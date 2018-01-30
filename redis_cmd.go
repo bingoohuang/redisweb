@@ -13,8 +13,8 @@ import (
 func newRedisClient(server RedisServer) *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     server.Addr,
-		Password: server.Password, // no password set
-		DB:       server.DB,       // use default DB
+		Password: server.Password,  // no password set
+		DB:       server.DefaultDb, // use default DB
 	})
 }
 

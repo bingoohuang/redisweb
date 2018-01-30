@@ -6,11 +6,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/BurntSushi/toml"
 	"github.com/skratchdot/open-golang/open"
 	"io"
+	"io/ioutil"
 	"log"
 	"mime"
 	"net/http"
+	"os"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -23,15 +26,16 @@ type RedisServer struct {
 	ServerName string
 	Addr       string
 	Password   string
-	DB         int
+	DefaultDb  int
 }
 
 var (
 	contextPath string
 	port        int
 
-	devMode bool // to disable css/js minify
-	servers []RedisServer
+	devMode    bool // to disable css/js minify
+	argServers string
+	servers    []RedisServer
 
 	maxKeys              int
 	convenientConfigFile string
@@ -50,7 +54,8 @@ func init() {
 	contextPath = *contextPathArg
 	port = *portArg
 	devMode = *devModeArg
-	servers = parseServers(*serversArg)
+	argServers = *serversArg
+	servers = parseServers(argServers)
 	maxKeys = *maxKeysArg
 	convenientConfigFile = *convenientConfigFileArg
 }
@@ -71,6 +76,16 @@ func parseServers(serversConfig string) []RedisServer {
 		} else {
 			panic("invalid servers argument")
 		}
+	}
+
+	redisServerConf := loadRedisServerConf()
+	for key, val := range redisServerConf.Servers {
+		result = append(result, RedisServer{
+			ServerName: key,
+			Addr:       val.Addr,
+			Password:   val.Password,
+			DefaultDb:  val.DefaultDb,
+		})
 	}
 
 	return result
@@ -97,7 +112,7 @@ func parseServerItem(serverName, serverConfig string) RedisServer {
 			ServerName: serverName,
 			Addr:       serverItems[0],
 			Password:   "",
-			DB:         0,
+			DefaultDb:  0,
 		}
 	} else if len == 2 {
 		dbIndex, _ := strconv.Atoi(serverItems[1])
@@ -105,7 +120,7 @@ func parseServerItem(serverName, serverConfig string) RedisServer {
 			ServerName: serverName,
 			Addr:       serverItems[0],
 			Password:   "",
-			DB:         dbIndex,
+			DefaultDb:  dbIndex,
 		}
 	} else if len == 3 {
 		dbIndex, _ := strconv.Atoi(serverItems[2])
@@ -113,7 +128,7 @@ func parseServerItem(serverName, serverConfig string) RedisServer {
 			ServerName: serverName,
 			Addr:       serverItems[1],
 			Password:   serverItems[0],
-			DB:         dbIndex,
+			DefaultDb:  dbIndex,
 		}
 	} else {
 		panic("invalid servers argument")
@@ -137,6 +152,9 @@ func main() {
 	http.HandleFunc(contextPath+"/convenientConfig", serveConvenientConfigRead)
 	http.HandleFunc(contextPath+"/convenientConfigAdd", serveConvenientConfigAdd)
 	http.HandleFunc(contextPath+"/deleteConvenientConfigItem", serveDeleteConvenientConfigItem)
+	http.HandleFunc(contextPath+"/loadRedisServerConfig", serveLoadRedisServerConfig)
+	http.HandleFunc(contextPath+"/saveRedisServerConfig", serveSaveRedisServerConfig)
+	http.HandleFunc(contextPath+"/changeRedisServer", serveChangeRedisServer)
 
 	sport := strconv.Itoa(port)
 	fmt.Println("start to listen at ", sport)
@@ -214,20 +232,22 @@ func serveListKeys(w http.ResponseWriter, req *http.Request) {
 }
 
 func findRedisServer(req *http.Request) RedisServer {
-	serverName := strings.TrimSpace(req.FormValue("serverName"))
+	serverName := strings.TrimSpace(req.FormValue("server"))
 	database := strings.TrimSpace(req.FormValue("database"))
 	server := findServer(serverName)
-	server.DB, _ = strconv.Atoi(database)
+	server.DefaultDb, _ = strconv.Atoi(database)
 	return server
 }
 
 func findServer(serverName string) RedisServer {
 	for _, server := range servers {
 		if server.ServerName == serverName {
+			fmt.Println("Found server ", serverName, server)
 			return server
 		}
 	}
 
+	fmt.Println("NotFound server ", serverName, ", user first ", servers[0])
 	return servers[0]
 }
 
@@ -336,10 +356,141 @@ func serveRedisCli(w http.ResponseWriter, req *http.Request) {
 	result := repl(server, cmd)
 	w.Write([]byte(result))
 }
+
 func serveRedisInfo(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	server := findRedisServer(req)
 
 	ok := redisInfo(server)
 	w.Write([]byte(ok))
+}
+
+const redisServerConfigFile = "redisServerConfig.toml"
+
+func serveLoadRedisServerConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "text/json; charset=utf-8")
+	if _, err := os.Stat(redisServerConfigFile); os.IsNotExist(err) {
+		json.NewEncoder(w).Encode(struct {
+			RedisServerConfig string
+		}{
+			RedisServerConfig: `[servers]
+    # [servers.demo1]
+    # Address = "127.0.0.1:6379"
+    # Password = ""
+    # DefaultDb = 0
+
+    # [servers.demo2]
+    # Address = "127.0.0.1:7379"
+    # Password = ""
+    # DefaultDb = 0`,
+		})
+		return
+	}
+
+	redisServerConfig, _ := ioutil.ReadFile(redisServerConfigFile)
+	json.NewEncoder(w).Encode(struct {
+		RedisServerConfig string
+	}{
+		RedisServerConfig: string(redisServerConfig),
+	})
+}
+
+type RedisServerConf struct {
+	Servers map[string]RedisServer
+}
+
+func loadRedisServerConf() RedisServerConf {
+	var redisServerConf RedisServerConf
+	_, err := toml.DecodeFile(redisServerConfigFile, &redisServerConf)
+	if err != nil {
+		fmt.Println("DecodeFile error:", err)
+	}
+
+	return redisServerConf
+}
+
+func serveChangeRedisServer(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "text/json; charset=utf-8")
+	redisServer := req.FormValue("redisServer")
+
+	var foundServer *RedisServer = nil
+	for _, server := range servers {
+		if redisServer == server.ServerName {
+			foundServer = &server
+			break
+		}
+	}
+
+	if foundServer != nil {
+		dbs := configGetDatabases(*foundServer)
+		json.NewEncoder(w).Encode(struct {
+			OK        string
+			DefaultDb int
+			Dbs       int
+		}{
+			OK:        "OK",
+			DefaultDb: foundServer.DefaultDb,
+			Dbs:       dbs,
+		})
+	} else {
+		json.NewEncoder(w).Encode(struct {
+			OK string
+		}{
+			OK: "Server Unknown",
+		})
+	}
+}
+
+func serveSaveRedisServerConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "text/json; charset=utf-8")
+	redisServerConfig := req.FormValue("redisServerConfig")
+
+	var redisServerConf RedisServerConf
+	_, err := toml.Decode(redisServerConfig, &redisServerConf)
+	if err != nil {
+		json.NewEncoder(w).Encode(struct {
+			OK string
+		}{
+			OK: err.Error(),
+		})
+		return
+	}
+
+	err = ioutil.WriteFile(redisServerConfigFile, []byte(redisServerConfig), 0644)
+	if err != nil {
+		json.NewEncoder(w).Encode(struct {
+			OK string
+		}{
+			OK: err.Error(),
+		})
+		return
+	}
+
+	loadRedisServerConf()
+	servers = parseServers(argServers)
+
+	serverNames := make([]string, 0)
+	for _, server := range servers {
+		serverNames = append(serverNames, server.ServerName)
+	}
+
+	dbs := 0
+	defaultDb := 0
+
+	if len(servers) > 0 {
+		defaultDb = servers[0].DefaultDb
+		dbs = configGetDatabases(servers[0])
+	}
+
+	json.NewEncoder(w).Encode(struct {
+		OK        string
+		Servers   []string
+		DefaultDb int
+		Dbs       int
+	}{
+		OK:        "OK",
+		Servers:   serverNames,
+		DefaultDb: defaultDb,
+		Dbs:       dbs,
+	})
 }
