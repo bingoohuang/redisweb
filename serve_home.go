@@ -84,19 +84,22 @@ func serverOptions() string {
 }
 
 func mergeCss() string {
-	return mergeStatic("stylesheet.css", "codemirror-5.29.0.min.css", "jquery.modal-0.8.2.min.css", "index.css")
+	return mergeStatic(' ', "stylesheet.css", "codemirror-5.29.0.min.css", "jquery.modal-0.8.2.min.css", "index.css")
 }
 
 func mergeScripts() string {
-	return mergeStatic("jquery-3.2.1.min.js", "codemirror-5.29.0.min.js", "matchbrackets-5.29.0.min.js",
-		"javascript-5.29.0.min.js", "autosize-4.0.0.min.js", "js.cookie.js", "utils.js", "jquery.modal-0.8.2.min.js", "index.js", "resizebar.js")
+	return mergeStatic(';', "jquery-3.2.1.min.js", "codemirror-5.29.0.min.js", "matchbrackets-5.29.0.min.js",
+		"javascript-5.29.0.min.js", "autosize-4.0.0.min.js", "js.cookie.js", "utils.js", "jquery.modal-0.8.2.min.js",
+		"common.js", "import.js", "keysTree.js", "export.js", "checkedKeys.js", "redisTerminal.js", "convenient.js",
+		"redisInfo.js", "content.js", "addKey.js",
+		"index.js", "resizebar.js")
 }
 
-func mergeStatic(statics ...string) string {
+func mergeStatic(seperate byte, statics ...string) string {
 	var scripts bytes.Buffer
 	for _, static := range statics {
 		scripts.Write(MustAsset("res/" + static))
-		scripts.Write([]byte("\n"))
+		scripts.WriteByte(seperate)
 	}
 
 	return scripts.String()

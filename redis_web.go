@@ -6,16 +6,16 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/skratchdot/open-golang/open"
 	"io"
 	"log"
 	"mime"
 	"net/http"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
-	"github.com/skratchdot/open-golang/open"
-	"runtime"
 	"time"
 )
 
