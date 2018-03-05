@@ -93,11 +93,11 @@ func mergeCss() string {
 }
 
 func mergeScripts() string {
-	return mergeStatic(';', "jquery-3.2.1.min.js",
+	return mergeStatic(';', "jquery-3.2.1.min.js", "jquery.hash.js",
 		"codemirror-5.34.0.min.js", "matchbrackets-5.34.0.min.js", "javascript-5.34.0.min.js", "toml-5.34.0.min.js",
 		"autosize-4.0.0.min.js", "js.cookie.js", "utils.js", "jquery.modal-0.8.2.min.js",
-		"common.js", "import.js", "keysTree.js", "export.js", "checkedKeys.js", "redisTerminal.js", "convenient.js",
-		"redisInfo.js", "content.js", "addKey.js", "serversMaintain.js",
+		"common.js", "import.js", "content.js", "keysTree.js", "export.js", "checkedKeys.js", "redisTerminal.js", "convenient.js",
+		"redisInfo.js", "addKey.js", "serversMaintain.js",
 		"index.js", "resizebar.js")
 }
 

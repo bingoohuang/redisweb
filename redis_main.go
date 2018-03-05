@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/gorilla/mux"
 )
 
 type RedisServer struct {
@@ -31,7 +32,7 @@ type RedisServer struct {
 
 var (
 	contextPath string
-	port        int
+	port        string
 
 	devMode    bool // to disable css/js minify
 	argServers string
@@ -52,7 +53,7 @@ func init() {
 	flag.Parse()
 
 	contextPath = *contextPathArg
-	port = *portArg
+	port = strconv.Itoa(*portArg)
 	devMode = *devModeArg
 	argServers = *serversArg
 	servers = parseServers(argServers)
@@ -136,30 +137,33 @@ func parseServerItem(serverName, serverConfig string) RedisServer {
 }
 
 func main() {
-	http.HandleFunc(contextPath+"/", gzipWrapper(serveHome))
-	http.HandleFunc(contextPath+"/favicon.png", serveImage("favicon.png"))
-	http.HandleFunc(contextPath+"/spritesheet.png", serveImage("spritesheet.png"))
-	http.HandleFunc(contextPath+"/listKeys", gzipWrapper(serveListKeys))
-	http.HandleFunc(contextPath+"/showContent", gzipWrapper(serveShowContent))
-	http.HandleFunc(contextPath+"/changeContent", serveNewKey)
-	http.HandleFunc(contextPath+"/deleteKey", serveDeleteKey)
-	http.HandleFunc(contextPath+"/deleteMultiKeys", serveDeleteMultiKeys)
-	http.HandleFunc(contextPath+"/exportKeys", gzipWrapper(serveExportKeys))
-	http.HandleFunc(contextPath+"/newKey", serveNewKey)
-	http.HandleFunc(contextPath+"/redisInfo", gzipWrapper(serveRedisInfo))
-	http.HandleFunc(contextPath+"/redisCli", serveRedisCli)
-	http.HandleFunc(contextPath+"/redisImport", serveRedisImport)
-	http.HandleFunc(contextPath+"/convenientConfig", serveConvenientConfigRead)
-	http.HandleFunc(contextPath+"/convenientConfigAdd", serveConvenientConfigAdd)
-	http.HandleFunc(contextPath+"/deleteConvenientConfigItem", serveDeleteConvenientConfigItem)
-	http.HandleFunc(contextPath+"/loadRedisServerConfig", serveLoadRedisServerConfig)
-	http.HandleFunc(contextPath+"/saveRedisServerConfig", serveSaveRedisServerConfig)
-	http.HandleFunc(contextPath+"/changeRedisServer", serveChangeRedisServer)
+	r := mux.NewRouter()
 
-	sport := strconv.Itoa(port)
-	fmt.Println("start to listen at ", sport)
-	go openExplorer(sport)
-	if err := http.ListenAndServe(":"+sport, nil); err != nil {
+	r.HandleFunc(contextPath+"/", gzipWrapper(serveHome))
+	r.HandleFunc(contextPath+"/favicon.png", serveImage("favicon.png"))
+	r.HandleFunc(contextPath+"/spritesheet.png", serveImage("spritesheet.png"))
+	r.HandleFunc(contextPath+"/listKeys", gzipWrapper(serveListKeys))
+	r.HandleFunc(contextPath+"/showContent", gzipWrapper(serveShowContent))
+	r.HandleFunc(contextPath+"/changeContent", serveNewKey)
+	r.HandleFunc(contextPath+"/deleteKey", serveDeleteKey)
+	r.HandleFunc(contextPath+"/deleteMultiKeys", serveDeleteMultiKeys)
+	r.HandleFunc(contextPath+"/exportKeys", gzipWrapper(serveExportKeys))
+	r.HandleFunc(contextPath+"/newKey", serveNewKey)
+	r.HandleFunc(contextPath+"/redisInfo", gzipWrapper(serveRedisInfo))
+	r.HandleFunc(contextPath+"/redisCli", serveRedisCli)
+	r.HandleFunc(contextPath+"/redisImport", serveRedisImport)
+	r.HandleFunc(contextPath+"/convenientConfig", serveConvenientConfigRead)
+	r.HandleFunc(contextPath+"/convenientConfigAdd", serveConvenientConfigAdd)
+	r.HandleFunc(contextPath+"/deleteConvenientConfigItem", serveDeleteConvenientConfigItem)
+	r.HandleFunc(contextPath+"/loadRedisServerConfig", serveLoadRedisServerConfig)
+	r.HandleFunc(contextPath+"/saveRedisServerConfig", serveSaveRedisServerConfig)
+	r.HandleFunc(contextPath+"/changeRedisServer", serveChangeRedisServer)
+
+	http.Handle(contextPath+"/", r)
+
+	fmt.Println("start to listen at ", port)
+	go openExplorer(port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
 }

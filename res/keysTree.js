@@ -8,12 +8,24 @@ $(function () {
                 if (typeof key === 'string' || key instanceof String) {
                     chosenKey(key)
                 }
+
+                var hashKey = $.hash().get('key')
+                if (hashKey) {
+                    chosenKey(hashKey)
+                    $.showContentAjax(hashKey)
+                }
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert("1." + jqXHR.responseText + "\nStatus: " + textStatus + "\nError: " + errorThrown)
             }
         })
     }
+
+    // listen one
+    $.hash().listen("key", function (hashKey) {
+        chosenKey(hashKey.key)
+        $.showContentAjax(hashKey.key)
+    })
 
     $('#serverFilterKeysBtn,#refreshKeys').click(refreshKeys)
     $('#serverFilterKeys').keydown(function (event) {
@@ -29,8 +41,6 @@ $(function () {
             $(li).find('input:checkbox').prop('checked', checked)
         })
     })
-
-    refreshKeys()
 
     $.refreshKeys = refreshKeys
 
