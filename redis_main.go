@@ -405,6 +405,10 @@ type RedisServerConf struct {
 
 func loadRedisServerConf() RedisServerConf {
 	var redisServerConf RedisServerConf
+	if _, err := os.Stat(redisServerConfigFile); os.IsNotExist(err) {
+		return redisServerConf
+	}
+	
 	_, err := toml.DecodeFile(redisServerConfigFile, &redisServerConf)
 	if err != nil {
 		fmt.Println("DecodeFile error:", err)
