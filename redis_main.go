@@ -7,6 +7,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/BurntSushi/toml"
+	"github.com/bingoohuang/go-utils"
+	"github.com/gorilla/mux"
 	"github.com/skratchdot/open-golang/open"
 	"io"
 	"io/ioutil"
@@ -20,7 +22,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"github.com/gorilla/mux"
 )
 
 type RedisServer struct {
@@ -139,25 +140,26 @@ func parseServerItem(serverName, serverConfig string) RedisServer {
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc(contextPath+"/", gzipWrapper(serveHome))
-	r.HandleFunc(contextPath+"/favicon.png", serveImage("favicon.png"))
-	r.HandleFunc(contextPath+"/spritesheet.png", serveImage("spritesheet.png"))
-	r.HandleFunc(contextPath+"/listKeys", gzipWrapper(serveListKeys))
-	r.HandleFunc(contextPath+"/showContent", gzipWrapper(serveShowContent))
-	r.HandleFunc(contextPath+"/changeContent", serveNewKey)
-	r.HandleFunc(contextPath+"/deleteKey", serveDeleteKey)
-	r.HandleFunc(contextPath+"/deleteMultiKeys", serveDeleteMultiKeys)
-	r.HandleFunc(contextPath+"/exportKeys", gzipWrapper(serveExportKeys))
-	r.HandleFunc(contextPath+"/newKey", serveNewKey)
-	r.HandleFunc(contextPath+"/redisInfo", gzipWrapper(serveRedisInfo))
-	r.HandleFunc(contextPath+"/redisCli", serveRedisCli)
-	r.HandleFunc(contextPath+"/redisImport", serveRedisImport)
-	r.HandleFunc(contextPath+"/convenientConfig", serveConvenientConfigRead)
-	r.HandleFunc(contextPath+"/convenientConfigAdd", serveConvenientConfigAdd)
-	r.HandleFunc(contextPath+"/deleteConvenientConfigItem", serveDeleteConvenientConfigItem)
-	r.HandleFunc(contextPath+"/loadRedisServerConfig", serveLoadRedisServerConfig)
-	r.HandleFunc(contextPath+"/saveRedisServerConfig", serveSaveRedisServerConfig)
-	r.HandleFunc(contextPath+"/changeRedisServer", serveChangeRedisServer)
+	handleFunc(r, "/", serveWelcome, false, false)
+	handleFunc(r, "/home", serveHome, true, true)
+	handleFunc(r, "/favicon.png", serveImage("favicon.png"), false, false)
+	handleFunc(r, "/spritesheet.png", serveImage("spritesheet.png"), false, false)
+	handleFunc(r, "/listKeys", serveListKeys, true, true)
+	handleFunc(r, "/showContent", serveShowContent, true, true)
+	handleFunc(r, "/changeContent", serveNewKey, false, true)
+	handleFunc(r, "/deleteKey", serveDeleteKey, false, true)
+	handleFunc(r, "/deleteMultiKeys", serveDeleteMultiKeys, false, true)
+	handleFunc(r, "/exportKeys", serveExportKeys, true, true)
+	handleFunc(r, "/newKey", serveNewKey, false, true)
+	handleFunc(r, "/redisInfo", serveRedisInfo, true, true)
+	handleFunc(r, "/redisCli", serveRedisCli, false, true)
+	handleFunc(r, "/redisImport", serveRedisImport, false, true)
+	handleFunc(r, "/convenientConfig", serveConvenientConfigRead, false, true)
+	handleFunc(r, "/convenientConfigAdd", serveConvenientConfigAdd, false, true)
+	handleFunc(r, "/deleteConvenientConfigItem", serveDeleteConvenientConfigItem, false, true)
+	handleFunc(r, "/loadRedisServerConfig", serveLoadRedisServerConfig, false, true)
+	handleFunc(r, "/saveRedisServerConfig", serveSaveRedisServerConfig, false, true)
+	handleFunc(r, "/changeRedisServer", serveChangeRedisServer, false, true)
 
 	http.Handle(contextPath+"/", r)
 
@@ -166,6 +168,26 @@ func main() {
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter,
+	*http.Request), gzip, basicAuth bool) {
+	wrap := f
+	if basicAuth {
+		wrap = go_utils.RandomPoemBasicAuth(wrap)
+	}
+
+	if gzip {
+		wrap = gzipWrapper(wrap)
+	}
+
+	r.HandleFunc(contextPath+path, wrap)
+}
+
+func serveWelcome(w http.ResponseWriter, r *http.Request) {
+	welcome := MustAsset("res/welcome.html")
+
+	go_utils.ServeWelcome(w, welcome, contextPath)
 }
 
 func openExplorer(port string) {
@@ -408,7 +430,7 @@ func loadRedisServerConf() RedisServerConf {
 	if _, err := os.Stat(redisServerConfigFile); os.IsNotExist(err) {
 		return redisServerConf
 	}
-	
+
 	_, err := toml.DecodeFile(redisServerConfigFile, &redisServerConf)
 	if err != nil {
 		fmt.Println("DecodeFile error:", err)
