@@ -2,12 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/bingoohuang/go-utils"
 	"github.com/go-ini/ini"
-	"math/rand"
 	"net/http"
 	"os"
 	"strings"
-	"time"
 )
 
 type ConvenientItem struct {
@@ -35,7 +34,7 @@ func convenientConfigNew(name, template, operations, ttl string) (string, string
 		return "", err.Error()
 	}
 
-	sectionName := RandStringBytesMaskImprSrc(10)
+	sectionName := go_utils.RandString(10)
 	section, err := cfg.NewSection(sectionName)
 	if err != nil {
 		return sectionName, err.Error()
@@ -52,33 +51,6 @@ func convenientConfigNew(name, template, operations, ttl string) (string, string
 	}
 
 	return sectionName, "OK"
-}
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const (
-	letterIdxBits = 6                    // 6 bits to represent a letter index
-	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
-)
-
-var src = rand.NewSource(time.Now().UnixNano())
-
-func RandStringBytesMaskImprSrc(n int) string {
-	b := make([]byte, n)
-	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
-		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			b[i] = letterBytes[idx]
-			i--
-		}
-		cache >>= letterIdxBits
-		remain--
-	}
-
-	return string(b)
 }
 
 func deleteConvenientConfigItem(sectionName string) error {
@@ -145,7 +117,7 @@ func parseConvenientConfig() ConvenientConfig {
 			ttl = ttlKey.MustString("-1s")
 		}
 
-		items = append([]ConvenientItem{ConvenientItem{
+		items = append([]ConvenientItem{{
 			Section:    sectionName,
 			Name:       name,
 			Template:   template.String(),

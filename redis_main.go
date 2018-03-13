@@ -1,27 +1,20 @@
 package main
 
 import (
-	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/bingoohuang/go-utils"
 	"github.com/gorilla/mux"
-	"github.com/skratchdot/open-golang/open"
 	"io"
 	"io/ioutil"
 	"log"
-	"mime"
 	"net/http"
 	"os"
-	"path/filepath"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type RedisServer struct {
@@ -41,6 +34,7 @@ var (
 
 	maxKeys              int
 	convenientConfigFile string
+	authBasic            bool
 )
 
 func init() {
@@ -50,6 +44,7 @@ func init() {
 	serversArg := flag.String("servers", "default=localhost:6379", "servers list, eg: Server1=localhost:6379,Server2=password2/localhost:6388/0")
 	maxKeysArg := flag.Int("maxKeys", 1000, "Max keys to be listed(0 means all keys).")
 	convenientConfigFileArg := flag.String("convenientConfigFile", "convenient-config.ini", "convenient-config.ini file path")
+	authBasicArg := flag.Bool("authBasic", false, "authBasic based on poems")
 
 	flag.Parse()
 
@@ -60,6 +55,8 @@ func init() {
 	servers = parseServers(argServers)
 	maxKeys = *maxKeysArg
 	convenientConfigFile = *convenientConfigFileArg
+	authBasic = *authBasicArg
+	fmt.Println("authBasic:", authBasic)
 }
 
 func parseServers(serversConfig string) []RedisServer {
@@ -164,85 +161,39 @@ func main() {
 	http.Handle(contextPath+"/", r)
 
 	fmt.Println("start to listen at ", port)
-	go openExplorer(port)
+	go_utils.OpenExplorer(port)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter,
-	*http.Request), gzip, basicAuth bool) {
-	wrap := f
-	if basicAuth {
+func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter, *http.Request), requiredGzip, requiredBasicAuth bool) {
+	wrap := go_utils.DumpRequest(f)
+	if requiredBasicAuth && authBasic {
 		wrap = go_utils.RandomPoemBasicAuth(wrap)
 	}
 
-	if gzip {
-		wrap = gzipWrapper(wrap)
+	if requiredGzip {
+		wrap = go_utils.GzipHandlerFunc(wrap)
 	}
 
 	r.HandleFunc(contextPath+path, wrap)
 }
 
 func serveWelcome(w http.ResponseWriter, r *http.Request) {
-	welcome := MustAsset("res/welcome.html")
-
-	go_utils.ServeWelcome(w, welcome, contextPath)
-}
-
-func openExplorer(port string) {
-	time.Sleep(100 * time.Millisecond)
-
-	switch runtime.GOOS {
-	case "windows":
-		fallthrough
-	case "darwin":
-		open.Run("http://127.0.0.1:" + port)
-	}
-}
-
-type gzipResponseWriter struct {
-	io.Writer
-	http.ResponseWriter
-}
-
-func (w gzipResponseWriter) Write(b []byte) (int, error) {
-	return w.Writer.Write(b)
-}
-
-func gzipWrapper(fn http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			fn(w, r)
-			return
-		}
-		w.Header().Set("Content-Encoding", "gzip")
-		gz := gzip.NewWriter(w)
-		defer gz.Close()
-		gzr := gzipResponseWriter{Writer: gz, ResponseWriter: w}
-		fn(gzr, r)
+	if !authBasic {
+		fmt.Println("Redirect to", contextPath+"/home")
+		http.Redirect(w, r, contextPath+"/home", 301)
+	} else {
+		welcome := MustAsset("res/welcome.html")
+		go_utils.ServeWelcome(w, welcome, contextPath)
 	}
 }
 
 func serveImage(image string) func(w http.ResponseWriter, r *http.Request) {
-	path := "res/" + image
-	data := MustAsset(path)
-
-	return func(w http.ResponseWriter, r *http.Request) {
-		fi, _ := AssetInfo(path)
-		buffer := bytes.NewReader(data)
-		w.Header().Set("Content-Type", detectContentType(fi.Name()))
-		w.Header().Set("Last-Modified", fi.ModTime().UTC().Format(http.TimeFormat))
-		w.WriteHeader(http.StatusOK)
-		io.Copy(w, buffer)
-	}
-}
-
-func detectContentType(name string) (t string) {
-	if t = mime.TypeByExtension(filepath.Ext(name)); t == "" {
-		t = "application/octet-stream"
-	}
-	return
+	data := MustAsset("res/" + image)
+	fi, _ := AssetInfo("res/" + image)
+	return go_utils.ServeImage(data, fi)
 }
 
 func serveListKeys(w http.ResponseWriter, req *http.Request) {
