@@ -24,7 +24,9 @@ $(function () {
             return
         }
 
-        var contentHtml = '<div><span class="key">' + key + '</span></div>' +
+        var contentHtml = '<div>' +
+            '<span class="sprite sprite-datatype-' + type + '"></span>' +
+            '<span class="key">' + key + '</span></div>' +
             '<table class="contentTable">' +
             '<tr><td class="titleCell">Type:</td><td colspan="2">' + type + '</td></tr>' +
             '<tr><td class="titleCell">TTL:</td><td colspan="2" contenteditable="true" id="ttl">' + ttl + '</td></tr>' +
