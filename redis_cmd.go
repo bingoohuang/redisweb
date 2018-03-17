@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 	"unicode"
+	"regexp"
 )
 
 func newRedisClient(server RedisServer) *redis.Client {
@@ -309,6 +310,8 @@ func convertString(s string) string {
 	return quote[1 : len(quote)-1]
 }
 
+var re = regexp.MustCompile(`\\x(..)`)
+
 func parseStringFormat(s string) (string, string) {
 	if s == "" {
 		return s, "UNKNOWN"
@@ -323,6 +326,7 @@ func parseStringFormat(s string) (string, string) {
 	}
 
 	quote := strconv.Quote(s)
+	quote = re.ReplaceAllString(quote, `$1 `)
 	return quote[1 : len(quote)-1], "UNKNOWN"
 }
 
