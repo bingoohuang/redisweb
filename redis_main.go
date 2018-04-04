@@ -165,6 +165,8 @@ func main() {
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
+
+	select {} // 阻塞
 }
 
 func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter, *http.Request), requiredGzip, requiredBasicAuth bool) {
@@ -246,7 +248,7 @@ func serveNewKey(w http.ResponseWriter, req *http.Request) {
 
 	server := findRedisServer(req)
 
-	//log.Println("keyType:", keyType, ",key:", key, ",ttl:", ttl, ",format:", format, ",value:", value)
+	// log.Println("keyType:", keyType, ",key:", key, ",ttl:", ttl, ",format:", format, ",value:", value)
 
 	ok := newKey(server, keyType, key, ttl, value)
 	w.Write([]byte(ok))

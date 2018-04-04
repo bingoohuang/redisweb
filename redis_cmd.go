@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis"
 	"log"
+	"regexp"
 	"strconv"
 	"time"
 	"unicode"
-	"regexp"
 )
 
 func newRedisClient(server RedisServer) *redis.Client {

@@ -17,3 +17,5 @@ bindata.go
 go-redis-web
 .DS_Store
 .idea
+go-redis-web.linux.bin.bz2
+vendor
