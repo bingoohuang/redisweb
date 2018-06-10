@@ -56,7 +56,6 @@ func init() {
 	maxKeys = *maxKeysArg
 	convenientConfigFile = *convenientConfigFileArg
 	authBasic = *authBasicArg
-	fmt.Println("authBasic:", authBasic)
 }
 
 func parseServers(serversConfig string) []RedisServer {
