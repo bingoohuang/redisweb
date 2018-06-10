@@ -8,23 +8,18 @@ import (
 )
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", 405)
-		return
-	}
-
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	html := string(MustAsset("res/index.html"))
 	html = strings.Replace(html, "<serverOptions/>", serverOptions(), 1)
 	html = strings.Replace(html, "<databaseOptions/>", databaseOptions(), 1)
-	html = go_utils.MinifyHtml(html, devMode)
+	html = go_utils.MinifyHtml(html, *devMode)
 
-	css := go_utils.MinifyCss(mergeCss(), devMode)
-	js := go_utils.MinifyJs(mergeScripts(), devMode)
+	css := go_utils.MinifyCss(mergeCss(), *devMode)
+	js := go_utils.MinifyJs(mergeScripts(), *devMode)
 	html = strings.Replace(html, "/*.CSS*/", css, 1)
 	html = strings.Replace(html, "/*.SCRIPT*/", js, 1)
-	html = strings.Replace(html, "${ContextPath}", contextPath, -1)
+	html = strings.Replace(html, "${ContextPath}", *contextPath, -1)
 	w.Write([]byte(html))
 }
 

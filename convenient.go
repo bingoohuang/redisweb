@@ -29,7 +29,7 @@ func convenientConfigNew(name, template, operations, ttl string) (string, string
 		return "", err.Error()
 	}
 
-	cfg, err := ini.Load(convenientConfigFile)
+	cfg, err := ini.Load(*convenientConfigFile)
 	if err != nil {
 		return "", err.Error()
 	}
@@ -45,7 +45,7 @@ func convenientConfigNew(name, template, operations, ttl string) (string, string
 	section.NewKey("operations", operations)
 	section.NewKey("ttl", ttl)
 
-	err = cfg.SaveTo(convenientConfigFile)
+	err = cfg.SaveTo(*convenientConfigFile)
 	if err != nil {
 		return sectionName, err.Error()
 	}
@@ -59,14 +59,14 @@ func deleteConvenientConfigItem(sectionName string) error {
 		return err
 	}
 
-	cfg, err := ini.Load(convenientConfigFile)
+	cfg, err := ini.Load(*convenientConfigFile)
 	if err != nil {
 		return err
 	}
 
 	cfg.DeleteSection(sectionName)
 
-	err = cfg.SaveTo(convenientConfigFile)
+	err = cfg.SaveTo(*convenientConfigFile)
 
 	return err
 }
@@ -82,7 +82,7 @@ func parseConvenientConfig() ConvenientConfig {
 		}
 	}
 
-	cfg, err := ini.Load(convenientConfigFile)
+	cfg, err := ini.Load(*convenientConfigFile)
 	if err != nil {
 		return ConvenientConfig{
 			Ready: false,
@@ -133,7 +133,7 @@ func parseConvenientConfig() ConvenientConfig {
 	}
 }
 func createIniFileIfNotExists() error {
-	file, err := os.OpenFile(convenientConfigFile, os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(*convenientConfigFile, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return err
 	}

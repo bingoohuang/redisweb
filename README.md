@@ -9,7 +9,7 @@ redis web admin based on go lang
 6. or build for windows 64bit: `env GOOS=windows GOARCH=amd64 go build`
 
 # startup
-```
+```bash
 bingoo@bingodeMacBook-Pro ~/G/go-redis-web> ./go-redis-web -h
 Usage of ./go-redis-web:
   -contextPath string
@@ -21,6 +21,9 @@ Usage of ./go-redis-web:
   -servers string
     	servers list, eg: Server1=localhost:6379,Server2=password2/localhost:6388/0 (default "default=localhost:6379")
 
+
+bingoo@bingodeMacBook-Pro ~/G/go-redis-web> nohup ./go-redis-web.linux.bin -servers=127.0.0.1:8051 -forceLogin -key=XXX -redirectUri=http://i.a.
+cn -localUrl=http://redis.a.b > go-redis-web.out 2>&1 &
 ```
 
 # snapshots

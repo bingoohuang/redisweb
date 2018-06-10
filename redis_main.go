@@ -25,37 +25,32 @@ type RedisServer struct {
 }
 
 var (
-	contextPath string
+	contextPath *string
 	port        string
 
-	devMode    bool // to disable css/js minify
-	argServers string
+	devMode    *bool // to disable css/js minify
+	argServers *string
 	servers    []RedisServer
 
-	maxKeys              int
-	convenientConfigFile string
-	authBasic            bool
+	maxKeys              *int
+	convenientConfigFile *string
+
+	authParam go_utils.MustAuthParam
 )
 
 func init() {
-	contextPathArg := flag.String("contextPath", "", "context path")
+	contextPath = flag.String("contextPath", "", "context path")
 	portArg := flag.Int("port", 8269, "Port to serve.")
-	devModeArg := flag.Bool("devMode", false, "devMode(disable js/css minify)")
-	serversArg := flag.String("servers", "default=localhost:6379", "servers list, eg: Server1=localhost:6379,Server2=password2/localhost:6388/0")
-	maxKeysArg := flag.Int("maxKeys", 1000, "Max keys to be listed(0 means all keys).")
-	convenientConfigFileArg := flag.String("convenientConfigFile", "convenient-config.ini", "convenient-config.ini file path")
-	authBasicArg := flag.Bool("authBasic", false, "authBasic based on poems")
+	devMode = flag.Bool("devMode", false, "devMode(disable js/css minify)")
+	argServers = flag.String("servers", "default=localhost:6379", "servers list, eg: Server1=localhost:6379,Server2=password2/localhost:6388/0")
+	maxKeys = flag.Int("maxKeys", 1000, "Max keys to be listed(0 means all keys).")
+	convenientConfigFile = flag.String("convenientConfigFile", "convenient-config.ini", "convenient-config.ini file path")
+	go_utils.PrepareMustAuthFlag(&authParam)
 
 	flag.Parse()
 
-	contextPath = *contextPathArg
 	port = strconv.Itoa(*portArg)
-	devMode = *devModeArg
-	argServers = *serversArg
-	servers = parseServers(argServers)
-	maxKeys = *maxKeysArg
-	convenientConfigFile = *convenientConfigFileArg
-	authBasic = *authBasicArg
+	servers = parseServers(*argServers)
 }
 
 func parseServers(serversConfig string) []RedisServer {
@@ -136,28 +131,27 @@ func parseServerItem(serverName, serverConfig string) RedisServer {
 func main() {
 	r := mux.NewRouter()
 
-	handleFunc(r, "/", serveWelcome, false, false)
-	handleFunc(r, "/home", serveHome, true, true)
-	handleFunc(r, "/favicon.png", serveImage("favicon.png"), false, false)
-	handleFunc(r, "/spritesheet.png", serveImage("spritesheet.png"), false, false)
-	handleFunc(r, "/listKeys", serveListKeys, true, true)
-	handleFunc(r, "/showContent", serveShowContent, true, true)
-	handleFunc(r, "/changeContent", serveNewKey, false, true)
-	handleFunc(r, "/deleteKey", serveDeleteKey, false, true)
-	handleFunc(r, "/deleteMultiKeys", serveDeleteMultiKeys, false, true)
-	handleFunc(r, "/exportKeys", serveExportKeys, true, true)
-	handleFunc(r, "/newKey", serveNewKey, false, true)
-	handleFunc(r, "/redisInfo", serveRedisInfo, true, true)
-	handleFunc(r, "/redisCli", serveRedisCli, false, true)
-	handleFunc(r, "/redisImport", serveRedisImport, false, true)
-	handleFunc(r, "/convenientConfig", serveConvenientConfigRead, false, true)
-	handleFunc(r, "/convenientConfigAdd", serveConvenientConfigAdd, false, true)
-	handleFunc(r, "/deleteConvenientConfigItem", serveDeleteConvenientConfigItem, false, true)
-	handleFunc(r, "/loadRedisServerConfig", serveLoadRedisServerConfig, false, true)
-	handleFunc(r, "/saveRedisServerConfig", serveSaveRedisServerConfig, false, true)
-	handleFunc(r, "/changeRedisServer", serveChangeRedisServer, false, true)
+	handleFunc(r, "/", serveHome, true)
+	handleFunc(r, "/favicon.png", serveImage("favicon.png"), false)
+	handleFunc(r, "/spritesheet.png", serveImage("spritesheet.png"), false)
+	handleFunc(r, "/listKeys", serveListKeys, true)
+	handleFunc(r, "/showContent", serveShowContent, true)
+	handleFunc(r, "/changeContent", serveNewKey, false)
+	handleFunc(r, "/deleteKey", serveDeleteKey, false)
+	handleFunc(r, "/deleteMultiKeys", serveDeleteMultiKeys, false)
+	handleFunc(r, "/exportKeys", serveExportKeys, true)
+	handleFunc(r, "/newKey", serveNewKey, false)
+	handleFunc(r, "/redisInfo", serveRedisInfo, true)
+	handleFunc(r, "/redisCli", serveRedisCli, false)
+	handleFunc(r, "/redisImport", serveRedisImport, false)
+	handleFunc(r, "/convenientConfig", serveConvenientConfigRead, false)
+	handleFunc(r, "/convenientConfigAdd", serveConvenientConfigAdd, false)
+	handleFunc(r, "/deleteConvenientConfigItem", serveDeleteConvenientConfigItem, false)
+	handleFunc(r, "/loadRedisServerConfig", serveLoadRedisServerConfig, false)
+	handleFunc(r, "/saveRedisServerConfig", serveSaveRedisServerConfig, false)
+	handleFunc(r, "/changeRedisServer", serveChangeRedisServer, false)
 
-	http.Handle(contextPath+"/", r)
+	http.Handle(*contextPath+"/", r)
 
 	fmt.Println("start to listen at ", port)
 	go_utils.OpenExplorer(port)
@@ -168,27 +162,16 @@ func main() {
 	select {} // 阻塞
 }
 
-func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter, *http.Request), requiredGzip, requiredBasicAuth bool) {
+func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter, *http.Request), requiredGzip bool) {
 	wrap := go_utils.DumpRequest(f)
-	if requiredBasicAuth && authBasic {
-		wrap = go_utils.RandomPoemBasicAuth(wrap)
-	}
 
 	if requiredGzip {
 		wrap = go_utils.GzipHandlerFunc(wrap)
 	}
 
-	r.HandleFunc(contextPath+path, wrap)
-}
+	wrap = go_utils.MustAuth(wrap, authParam)
 
-func serveWelcome(w http.ResponseWriter, r *http.Request) {
-	if !authBasic {
-		fmt.Println("Redirect to", contextPath+"/home")
-		http.Redirect(w, r, contextPath+"/home", 301)
-	} else {
-		welcome := MustAsset("res/welcome.html")
-		go_utils.ServeWelcome(w, welcome, contextPath)
-	}
+	r.HandleFunc(*contextPath+path, wrap)
 }
 
 func serveImage(image string) func(w http.ResponseWriter, r *http.Request) {
@@ -202,7 +185,7 @@ func serveListKeys(w http.ResponseWriter, req *http.Request) {
 	matchPattern := strings.TrimSpace(req.FormValue("pattern"))
 	server := findRedisServer(req)
 
-	keys, _ := listKeys(server, matchPattern, maxKeys)
+	keys, _ := listKeys(server, matchPattern, *maxKeys)
 	sort.Slice(keys[:], func(i, j int) bool {
 		return keys[i].Key < keys[j].Key
 	})
@@ -449,7 +432,7 @@ func serveSaveRedisServerConfig(w http.ResponseWriter, req *http.Request) {
 	}
 
 	loadRedisServerConf()
-	servers = parseServers(argServers)
+	servers = parseServers(*argServers)
 
 	serverNames := make([]string, 0)
 	for _, server := range servers {
