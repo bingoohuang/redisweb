@@ -15,8 +15,10 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	html = strings.Replace(html, "<databaseOptions/>", databaseOptions(), 1)
 	html = go_utils.MinifyHtml(html, *devMode)
 
-	css := go_utils.MinifyCss(mergeCss(), *devMode)
-	js := go_utils.MinifyJs(mergeScripts(), *devMode)
+	mergeCss := go_utils.MergeCss(MustAsset, go_utils.FilterAssetNames(AssetNames(), ".css"))
+	css := go_utils.MinifyCss(mergeCss, *devMode)
+	mergeScripts := go_utils.MergeJs(MustAsset, go_utils.FilterAssetNames(AssetNames(), ".js"))
+	js := go_utils.MinifyJs(mergeScripts, *devMode)
 	html = strings.Replace(html, "/*.CSS*/", css, 1)
 	html = strings.Replace(html, "/*.SCRIPT*/", js, 1)
 	html = strings.Replace(html, "${ContextPath}", *contextPath, -1)
@@ -48,15 +50,4 @@ func serverOptions() string {
 	}
 
 	return options
-}
-
-func mergeCss() string {
-	return go_utils.MergeCss(MustAsset, "stylesheet.css", "index.css")
-}
-
-func mergeScripts() string {
-	return go_utils.MergeJs(MustAsset, "jquery.hash.js", "utils.js",
-		"common.js", "import.js", "content.js", "keysTree.js", "export.js", "checkedKeys.js", "redisTerminal.js", "convenient.js",
-		"redisInfo.js", "addKey.js", "serversMaintain.js",
-		"index.js", "resizebar.js")
 }
