@@ -82,6 +82,7 @@
   version = "v2.3.5"
 
 [[projects]]
+  branch = "master"
   name = "github.com/tdewolff/parse"
   packages = [
     ".",
@@ -91,12 +92,11 @@
     "js",
     "strconv"
   ]
-  revision = "639f6272aec6b52094db77b9ec488214b0b4b1a1"
-  version = "v2.3.2"
+  revision = "d739d6fccb0971177e06352fea02d3552625efb1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5b7483d981cf8f99146910be161d042ea062c46c69905f6d7587372d8a28872a"
+  inputs-digest = "ad01ee4388afd8d4e3cae458fa9cafc405bdd02686c6c170079171f2772c9714"
   solver-name = "gps-cdcl"
   solver-version = 1
