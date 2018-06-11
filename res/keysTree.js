@@ -84,7 +84,7 @@ $(function () {
             $li.toggle(contains)
         })
 
-        $('#sidebar').height(window.outerHeight)
+        // $('#sidebar').height(window.outerHeight)
     }
 
     $('#filterKeys').keyup(toggleFilterKeys)
