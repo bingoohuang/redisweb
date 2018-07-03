@@ -21,11 +21,14 @@ $(function () {
         })
     }
 
-    // listen one
-    $.hash().listen("key", function (hashKey) {
-        chosenKey(hashKey.key)
-        $.showContentAjax(hashKey.key)
-    })
+    setTimeout(function () {
+        // listen url hash
+        $.hash().listen("key", function (hashKey) {
+            chosenKey(hashKey.key)
+            $.showContentAjax(hashKey.key)
+        })
+    }, 100)
+
 
     $('#serverFilterKeysBtn,#refreshKeys').click(refreshKeys)
     $('#serverFilterKeys').keydown(function (event) {

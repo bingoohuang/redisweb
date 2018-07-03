@@ -19,3 +19,4 @@ go-redis-web
 .idea
 go-redis-web.linux.bin.bz2
 vendor
+*.bin

@@ -21,7 +21,7 @@
 .sprite-import { background-position: -0px -192px; width: 16px; height: 16px; }
 .sprite-info { background-position: -0px -208px; width: 16px; height: 16px; }
 .sprite-logout { background-position: -0px -224px; width: 16px; height: 16px; }
-.sprite-redis { background-position: -0px -240px; width: 16px; height: 16px; }
+.sprite-redis { background-position: -0px -240px; width: 16px; height: 16px;  display: inline-block}
 .sprite-refresh { background-position: -0px -256px; width: 16px; height: 16px; }
 .sprite-reset { background-position: -0px -272px; width: 16px; height: 16px; }
 .sprite-save { background-position: -0px -288px; width: 16px; height: 16px; }
