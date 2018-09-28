@@ -57,7 +57,7 @@ $(function () {
             keysHtml += '<li class="datatype-' + key.Type + ' sprite ' + nodeCss + '" data-type="' + key.Type + '">' +
                 '<input type="checkbox">' +
                 '<span class="sprite sprite-datatype-' + key.Type + '"></span>' +
-                '<span class="keyValue">' + key.Key + '</span>'
+                '<span class="keyValue">' + escapeHtml(key.Key) + '</span>'
 
             var numInfo = key.Len != -1 ? '(' + key.Len + ')' : ''
             keysHtml += '<span class="info">' + numInfo + '</span></li>'

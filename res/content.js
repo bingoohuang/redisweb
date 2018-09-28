@@ -19,14 +19,14 @@ $(function () {
         }
 
         if (!exists) {
-            contentHtml = '<div><span class="key">' + key + ' does not exits</span></div>'
+            contentHtml = '<div><span class="key">' + escapeHtml(key) + ' does not exits</span></div>'
             $('#frame').html(contentHtml)
             return
         }
 
         var contentHtml = '<div>' +
             '<span class="sprite sprite-datatype-' + type + '"></span>' +
-            '<span class="key">' + key + '</span></div>' +
+            '<span class="key">' + escapeHtml(key) + '</span></div>' +
             '<table class="contentTable">' +
             '<tr><td class="titleCell">Type:</td><td colspan="2">' + type + '</td></tr>' +
             '<tr><td class="titleCell">TTL:</td><td colspan="2" contenteditable="true" id="ttl">' + ttl + '</td></tr>' +

@@ -56,7 +56,7 @@ function joinKeysWithNo(keys) {
     var length = keys.length
     var lengthSize = ('' + length).length
     for (var i = 0; i < length; ++i) {
-        result.push(pad(i + 1, lengthSize) + '.&nbsp;' + keys[i] + '<br>')
+        result.push(pad(i + 1, lengthSize) + '.&nbsp;' + escapeHtml(keys[i]) + '<br>')
     }
     return result.join('')
 }
@@ -89,5 +89,14 @@ function parseTemplateVariables(template) {
 
 function capitalize(s) {
     return s && s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
