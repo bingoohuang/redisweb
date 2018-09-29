@@ -359,25 +359,25 @@ type KeysResult struct {
 	Len  int64
 }
 
-func listKeys(server RedisServer, matchPattern string, maxKeys int) ([]KeysResult, error) {
+func listKeys(server RedisServer, cursor uint64, matchPattern string, maxKeys int) ([]KeysResult, uint64, error) {
 	client := newRedisClient(server)
 	defer client.Close()
 
 	allKeys := make([]KeysResult, 0)
 	var keys []string
-	var cursor uint64
+	ncursor := cursor
 	var err error
 
 	for {
-		keys, cursor, err = client.Scan(cursor, matchPattern, 10).Result()
+		keys, ncursor, err = client.Scan(ncursor, matchPattern, 10).Result()
 		if err != nil {
-			return nil, err
+			return nil, ncursor, err
 		}
 
 		for _, key := range keys {
 			valType, err := client.Type(key).Result()
 			if err != nil {
-				return nil, err
+				return nil, ncursor, err
 			}
 
 			var len int64
@@ -399,10 +399,10 @@ func listKeys(server RedisServer, matchPattern string, maxKeys int) ([]KeysResul
 			allKeys = append(allKeys, KeysResult{Key: key, Type: valType, Len: len})
 		}
 
-		if cursor == 0 || (maxKeys > 0 && len(allKeys) >= maxKeys) {
+		if ncursor == 0 || (maxKeys > 0 && len(allKeys) >= maxKeys) {
 			break
 		}
 	}
 
-	return allKeys, nil
+	return allKeys, ncursor, nil
 }

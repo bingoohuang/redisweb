@@ -2,7 +2,6 @@
 
 .sprite {
     background: url(spritesheet.png) no-repeat;
-    display: block;
     vertical-align: middle;
 }
 
@@ -21,15 +20,16 @@
 .sprite-import { background-position: -0px -192px; width: 16px; height: 16px; }
 .sprite-info { background-position: -0px -208px; width: 16px; height: 16px; }
 .sprite-logout { background-position: -0px -224px; width: 16px; height: 16px; }
-.sprite-redis { background-position: -0px -240px; width: 16px; height: 16px;  display: inline-block}
-.sprite-refresh { background-position: -0px -256px; width: 16px; height: 16px; }
-.sprite-reset { background-position: -0px -272px; width: 16px; height: 16px; }
-.sprite-save { background-position: -0px -288px; width: 16px; height: 16px; }
-.sprite-terminal { background-position: -0px -304px; width: 14px; height: 16px; }
-.sprite-tree-folder-collapsed { background-position: -0px -320px; width: 12px; height: 24px; }
-.sprite-tree-folder-expanded { background-position: -0px -344px; width: 12px; height: 24px; }
-.sprite-tree-lastnode-collapsed { background-position: -0px -368px; width: 12px; height: 17px; }
-.sprite-tree-lastnode-expanded { background-position: -0px -385px; width: 12px; height: 17px; }
-.sprite-tree-lastnode { background-position: -0px -402px; width: 12px; height: 13px; }
-.sprite-tree-node { background-position: -0px -415px; width: 12px; height: 24px; }
-.sprite-tree-vline { background-position: -0px -439px; width: 5px; height: 1px; }
+.sprite-next { background-position: -0px -240px; width: 16px; height: 16px; }
+.sprite-redis { background-position: -0px -256px; width: 16px; height: 16px; }
+.sprite-refresh { background-position: -0px -272px; width: 16px; height: 16px; }
+.sprite-reset { background-position: -0px -288px; width: 16px; height: 16px; }
+.sprite-save { background-position: -0px -304px; width: 16px; height: 16px; }
+.sprite-terminal { background-position: -0px -320px; width: 14px; height: 16px; }
+.sprite-tree-folder-collapsed { background-position: -0px -336px; width: 12px; height: 24px; }
+.sprite-tree-folder-expanded { background-position: -0px -360px; width: 12px; height: 24px; }
+.sprite-tree-lastnode-collapsed { background-position: -0px -384px; width: 12px; height: 17px; }
+.sprite-tree-lastnode-expanded { background-position: -0px -401px; width: 12px; height: 17px; }
+.sprite-tree-lastnode { background-position: -0px -418px; width: 12px; height: 13px; }
+.sprite-tree-node { background-position: -0px -431px; width: 12px; height: 24px; }
+.sprite-tree-vline { background-position: -0px -455px; width: 5px; height: 1px; }

@@ -33,7 +33,7 @@ body {
     border: 0;
 }
 
-#refreshKeys, #redisTerminal, #checkAllChk, #exportKeys, #filterKeys, #redisImport, #convenientSpan {
+#nextKeys, #refreshKeys, #redisTerminal, #checkAllChk, #exportKeys, #filterKeys, #redisImport, #convenientSpan {
     margin-left: -10px;
 }
 

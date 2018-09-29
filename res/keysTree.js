@@ -1,8 +1,13 @@
 $(function () {
-    function refreshKeys(key) {
+    function refreshKeys(key, cursor) {
         $.ajax({
             type: 'GET', url: contextPath + "/listKeys",
-            data: {server: $('#servers').val(), database: $('#databases').val(), pattern: $('#serverFilterKeys').val()},
+            data: {
+                server: $('#servers').val(),
+                database: $('#databases').val(),
+                pattern: $('#serverFilterKeys').val(),
+                cursor: cursor || 0
+            },
             success: function (content, textStatus, request) {
                 showKeysTree(content)
                 if (typeof key === 'string' || key instanceof String) {
@@ -30,7 +35,15 @@ $(function () {
     }, 100)
 
 
-    $('#serverFilterKeysBtn,#refreshKeys').click(refreshKeys)
+    $('#serverFilterKeysBtn,#refreshKeys').click(function () {
+        refreshKeys(null, 0)
+    })
+
+    $('#nextKeys').click(function () {
+        var cursor = parseInt($('#curosrSpan').text())
+        refreshKeys(null, cursor)
+    })
+
     $('#serverFilterKeys').keydown(function (event) {
         var keyCode = event.keyCode || event.which
         if (keyCode == 13) {
@@ -47,7 +60,10 @@ $(function () {
 
     $.refreshKeys = refreshKeys
 
-    function showKeysTree(keysArray) {
+    function showKeysTree(content) {
+        $('#curosrSpan').text(content.Cursor)
+
+        var keysArray = content.Keys
         $('#keysNum').html('(' + keysArray.length + ')')
 
         var keysHtml = '<ul>'
