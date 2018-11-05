@@ -16,6 +16,7 @@ func main() {
 	handleFunc(r, "/spritesheet.png", serveImage("spritesheet.png"), false)
 	handleFunc(r, "/listKeys", serveListKeys, true)
 	handleFunc(r, "/showContent", serveShowContent, true)
+	handleFunc(r, "/downloadContent", downloadContent, true)
 	handleFunc(r, "/changeContent", serveNewKey, false)
 	handleFunc(r, "/deleteKey", serveDeleteKey, false)
 	handleFunc(r, "/deleteMultiKeys", serveDeleteMultiKeys, false)
@@ -31,7 +32,7 @@ func main() {
 	handleFunc(r, "/saveRedisServerConfig", serveSaveRedisServerConfig, false)
 	handleFunc(r, "/changeRedisServer", serveChangeRedisServer, false)
 
-	http.Handle(*contextPath+"/", r)
+	http.Handle(contextPath+"/", r)
 
 	fmt.Println("start to listen at ", port)
 	go_utils.OpenExplorer(port)
@@ -51,5 +52,5 @@ func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter, *http.Re
 
 	wrap = go_utils.MustAuth(wrap, authParam)
 
-	r.HandleFunc(*contextPath+path, wrap)
+	r.HandleFunc(contextPath+path, wrap)
 }

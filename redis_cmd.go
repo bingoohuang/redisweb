@@ -222,7 +222,7 @@ type ContentResult struct {
 	Type     string
 }
 
-func displayContent(server RedisServer, key string) *ContentResult {
+func displayContent(server RedisServer, key string, maxContentCheck bool, raw bool) *ContentResult {
 	client := newRedisClient(server)
 	defer client.Close()
 
@@ -253,11 +253,15 @@ func displayContent(server RedisServer, key string) *ContentResult {
 	switch valType {
 	case "string":
 		size, _ = client.StrLen(key).Result()
-		content, err = client.Get(key).Result()
-		if err == nil {
-			content, format = parseStringFormat(content.(string))
+		if maxContentCheck && size > maxContentSize {
+			content = "too large to display"
+			format = "Unknown!"
+		} else {
+			content, err = client.Get(key).Result()
+			if !raw && err == nil {
+				content, format = parseStringFormat(content.(string))
+			}
 		}
-
 	case "hash":
 		content, err = client.HGetAll(key).Result()
 		size, _ = client.HLen(key).Result()

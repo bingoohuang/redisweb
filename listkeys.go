@@ -31,7 +31,7 @@ func serveListKeys(w http.ResponseWriter, req *http.Request) {
 
 	server := findRedisServer(req)
 
-	keys, ncursor, _ := listKeys(server, cursor, matchPattern, *maxKeys)
+	keys, ncursor, _ := listKeys(server, cursor, matchPattern, maxKeys)
 	sort.Slice(keys[:], func(i, j int) bool {
 		return keys[i].Key < keys[j].Key
 	})

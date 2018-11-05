@@ -33,7 +33,7 @@ func serveSaveRedisServerConfig(w http.ResponseWriter, req *http.Request) {
 	}
 
 	loadRedisServerConf()
-	servers = parseServers(*argServers)
+	servers = parseServers(argServers)
 
 	serverNames := make([]string, 0)
 	for _, server := range servers {

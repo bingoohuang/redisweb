@@ -33,7 +33,11 @@ $(function () {
             '<tr><td class="titleCell">Encoding:</td><td colspan="2">' + encoding + '</td></tr>' +
             '<tr><td class="titleCell">Format:</td><td colspan="2">' + format + '</td></tr>' +
             '<tr><td class="titleCell">Size:</td><td colspan="2">' + size + '</td></tr>' +
-            '<tr><td class="titleCell">Value:</td><td colspan="2"><span class="valueSave sprite sprite-save"></span><span class="keyDelete sprite sprite-delete"></span></td></tr>'
+            '<tr><td class="titleCell">Value:</td><td colspan="2">' +
+            '<span class="valueSave sprite sprite-save"></span>' +
+            '<span class="keyDelete sprite sprite-delete"></span>' +
+            '<span class="downloadValue sprite sprite-donwload"></span>' +
+            '</td></tr>'
 
         switch (type) {
             case "string":
@@ -133,6 +137,30 @@ $(function () {
                     }
                 })
             }
+        })
+
+        $('.downloadValue').click(function () {
+            let fileName = window.prompt("please set download file name", key + ".xxx");
+
+
+            $.ajax({
+                type: 'POST', url: contextPath + "/downloadContent",
+                dataType: 'native',
+                data: {
+                    server: $('#servers').val(), database: $('#databases').val(),
+                    key: key, fileName: fileName
+                },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (blob) {
+                    console.log(blob.size);
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = fileName;
+                    link.click();
+                }
+            })
         })
     }
 

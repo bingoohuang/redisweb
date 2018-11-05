@@ -1,18 +1,31 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/bingoohuang/go-utils"
 	"net/http"
 	"strings"
+	"time"
 )
+
+func downloadContent(w http.ResponseWriter, req *http.Request) {
+	key := strings.TrimSpace(req.FormValue("key"))
+	server := findRedisServer(req)
+	fileName := strings.TrimSpace(req.FormValue("fileName"))
+
+	// tell the browser the returned content should be downloaded
+	w.Header().Add("Content-Disposition", "Attachment; filename="+fileName)
+	content := displayContent(server, key, false, true)
+	http.ServeContent(w, req, fileName, time.Now(), bytes.NewReader([]byte(content.Content.(string))))
+}
 
 func serveShowContent(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	key := strings.TrimSpace(req.FormValue("key"))
 	server := findRedisServer(req)
 
-	content := displayContent(server, key)
+	content := displayContent(server, key, true, false)
 	json.NewEncoder(w).Encode(content)
 }
 
