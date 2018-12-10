@@ -140,8 +140,8 @@ $(function () {
         })
 
         $('.downloadValue').click(function () {
-            let fileName = window.prompt("please set download file name", key + ".xxx");
-
+            let fileName = window.prompt("please set download file name", key + ".xxx")
+            if (fileName == null) return
 
             $.ajax({
                 type: 'POST', url: contextPath + "/downloadContent",
