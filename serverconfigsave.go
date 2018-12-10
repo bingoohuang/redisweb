@@ -3,18 +3,19 @@ package main
 import (
 	"encoding/json"
 	"github.com/BurntSushi/toml"
+	"github.com/bingoohuang/go-utils"
 	"io/ioutil"
 	"net/http"
 )
 
 func serveSaveRedisServerConfig(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/json; charset=utf-8")
+	go_utils.HeadContentTypeJson(w)
 	redisServerConfig := req.FormValue("redisServerConfig")
 
 	var redisServerConf RedisServerConf
 	_, err := toml.Decode(redisServerConfig, &redisServerConf)
 	if err != nil {
-		json.NewEncoder(w).Encode(struct {
+		_ = json.NewEncoder(w).Encode(struct {
 			OK string
 		}{
 			OK: err.Error(),
@@ -24,7 +25,7 @@ func serveSaveRedisServerConfig(w http.ResponseWriter, req *http.Request) {
 
 	err = ioutil.WriteFile(redisServerConfigFile, []byte(redisServerConfig), 0644)
 	if err != nil {
-		json.NewEncoder(w).Encode(struct {
+		_ = json.NewEncoder(w).Encode(struct {
 			OK string
 		}{
 			OK: err.Error(),
@@ -33,7 +34,7 @@ func serveSaveRedisServerConfig(w http.ResponseWriter, req *http.Request) {
 	}
 
 	loadRedisServerConf()
-	servers = parseServers(argServers)
+	servers = parseServers(appConfig.Servers)
 
 	serverNames := make([]string, 0)
 	for _, server := range servers {
@@ -48,7 +49,7 @@ func serveSaveRedisServerConfig(w http.ResponseWriter, req *http.Request) {
 		dbs = configGetDatabases(servers[0])
 	}
 
-	json.NewEncoder(w).Encode(struct {
+	_ = json.NewEncoder(w).Encode(struct {
 		OK        string
 		Servers   []string
 		DefaultDb int

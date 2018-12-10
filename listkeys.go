@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/bingoohuang/go-utils"
 	"net/http"
 	"sort"
 	"strconv"
@@ -14,7 +15,7 @@ type ListKeysResult struct {
 }
 
 func serveListKeys(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	go_utils.HeadContentTypeJson(w)
 	matchPattern := strings.TrimSpace(req.FormValue("pattern"))
 	cursorStr := strings.TrimSpace(req.FormValue("cursor"))
 	var cursor uint64
@@ -31,11 +32,11 @@ func serveListKeys(w http.ResponseWriter, req *http.Request) {
 
 	server := findRedisServer(req)
 
-	keys, ncursor, _ := listKeys(server, cursor, matchPattern, maxKeys)
+	keys, ncursor, _ := listKeys(server, cursor, matchPattern, appConfig.MaxKeys)
 	sort.Slice(keys[:], func(i, j int) bool {
 		return keys[i].Key < keys[j].Key
 	})
-	json.NewEncoder(w).Encode(ListKeysResult{
+	_ = json.NewEncoder(w).Encode(ListKeysResult{
 		Keys:   keys,
 		Cursor: ncursor,
 	})

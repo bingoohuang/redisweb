@@ -253,7 +253,7 @@ func displayContent(server RedisServer, key string, maxContentCheck bool, raw bo
 	switch valType {
 	case "string":
 		size, _ = client.StrLen(key).Result()
-		if maxContentCheck && size > maxContentSize {
+		if maxContentCheck && size > appConfig.MaxContentSize {
 			content = "too large to display"
 			format = "Unknown!"
 		} else {
@@ -384,23 +384,23 @@ func listKeys(server RedisServer, cursor uint64, matchPattern string, maxKeys in
 				return nil, ncursor, err
 			}
 
-			var len int64
+			var conentLen int64
 			switch valType {
 			case "string":
-				len, _ = client.StrLen(key).Result()
+				conentLen, _ = client.StrLen(key).Result()
 			case "list":
-				len, _ = client.LLen(key).Result()
+				conentLen, _ = client.LLen(key).Result()
 			case "hash":
-				len, _ = client.HLen(key).Result()
+				conentLen, _ = client.HLen(key).Result()
 			case "set":
-				len, _ = client.SCard(key).Result()
+				conentLen, _ = client.SCard(key).Result()
 			case "zset":
-				len, _ = client.ZCard(key).Result()
+				conentLen, _ = client.ZCard(key).Result()
 			default:
-				len = -1
+				conentLen = -1
 			}
 
-			allKeys = append(allKeys, KeysResult{Key: key, Type: valType, Len: len})
+			allKeys = append(allKeys, KeysResult{Key: key, Type: valType, Len: conentLen})
 		}
 
 		if ncursor == 0 || (maxKeys > 0 && len(allKeys) >= maxKeys) {

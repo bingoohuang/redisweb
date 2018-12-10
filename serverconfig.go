@@ -14,7 +14,7 @@ const redisServerConfigFile = "redisServerConfig.toml"
 func serveLoadRedisServerConfig(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/json; charset=utf-8")
 	if _, err := os.Stat(redisServerConfigFile); os.IsNotExist(err) {
-		json.NewEncoder(w).Encode(struct {
+		_ = json.NewEncoder(w).Encode(struct {
 			RedisServerConfig string
 		}{
 			RedisServerConfig: `[servers]
@@ -32,7 +32,7 @@ func serveLoadRedisServerConfig(w http.ResponseWriter, req *http.Request) {
 	}
 
 	redisServerConfig, _ := ioutil.ReadFile(redisServerConfigFile)
-	json.NewEncoder(w).Encode(struct {
+	_ = json.NewEncoder(w).Encode(struct {
 		RedisServerConfig string
 	}{
 		RedisServerConfig: string(redisServerConfig),
@@ -71,7 +71,7 @@ func serveChangeRedisServer(w http.ResponseWriter, req *http.Request) {
 
 	if foundServer != nil {
 		dbs := configGetDatabases(*foundServer)
-		json.NewEncoder(w).Encode(struct {
+		_ = json.NewEncoder(w).Encode(struct {
 			OK        string
 			DefaultDb int
 			Dbs       int
@@ -81,7 +81,7 @@ func serveChangeRedisServer(w http.ResponseWriter, req *http.Request) {
 			Dbs:       dbs,
 		})
 	} else {
-		json.NewEncoder(w).Encode(struct {
+		_ = json.NewEncoder(w).Encode(struct {
 			OK string
 		}{
 			OK: "Server Unknown",

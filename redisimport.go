@@ -14,8 +14,8 @@ func serveRedisImport(w http.ResponseWriter, req *http.Request) {
 
 	for index, commandItem := range commandItems {
 		result := repl(server, commandItem)
-		w.Write([]byte(strconv.Itoa(index+1) + ": "))
-		w.Write([]byte(result))
-		w.Write([]byte("\r\n"))
+		_, _ = w.Write([]byte(strconv.Itoa(index+1) + ": "))
+		_, _ = w.Write([]byte(result))
+		_, _ = w.Write([]byte("\r\n"))
 	}
 }

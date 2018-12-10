@@ -13,15 +13,15 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	html := string(MustAsset("res/index.html"))
 	html = strings.Replace(html, "<serverOptions/>", serverOptions(), 1)
 	html = strings.Replace(html, "<databaseOptions/>", databaseOptions(), 1)
-	html = go_utils.MinifyHtml(html, devMode)
+	html = go_utils.MinifyHtml(html, appConfig.DevMode)
 
 	mergeCss := go_utils.MergeCss(MustAsset, go_utils.FilterAssetNames(AssetNames(), ".css"))
-	css := go_utils.MinifyCss(mergeCss, devMode)
+	css := go_utils.MinifyCss(mergeCss, appConfig.DevMode)
 	mergeScripts := go_utils.MergeJs(MustAsset, go_utils.FilterAssetNames(AssetNames(), ".js"))
-	js := go_utils.MinifyJs(mergeScripts, devMode)
+	js := go_utils.MinifyJs(mergeScripts, appConfig.DevMode)
 	html = strings.Replace(html, "/*.CSS*/", css, 1)
 	html = strings.Replace(html, "/*.SCRIPT*/", js, 1)
-	html = strings.Replace(html, "${ContextPath}", contextPath, -1)
+	html = strings.Replace(html, "${ContextPath}", appConfig.ContextPath, -1)
 	w.Write([]byte(html))
 }
 

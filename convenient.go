@@ -29,7 +29,7 @@ func convenientConfigNew(name, template, operations, ttl string) (string, string
 		return "", err.Error()
 	}
 
-	cfg, err := ini.Load(convenientConfigFile)
+	cfg, err := ini.Load(appConfig.ConvenientConfigFile)
 	if err != nil {
 		return "", err.Error()
 	}
@@ -40,12 +40,12 @@ func convenientConfigNew(name, template, operations, ttl string) (string, string
 		return sectionName, err.Error()
 	}
 
-	section.NewKey("name", name)
-	section.NewKey("template", template)
-	section.NewKey("operations", operations)
-	section.NewKey("ttl", ttl)
+	_, _ = section.NewKey("name", name)
+	_, _ = section.NewKey("template", template)
+	_, _ = section.NewKey("operations", operations)
+	_, _ = section.NewKey("ttl", ttl)
 
-	err = cfg.SaveTo(convenientConfigFile)
+	err = cfg.SaveTo(appConfig.ConvenientConfigFile)
 	if err != nil {
 		return sectionName, err.Error()
 	}
@@ -59,14 +59,14 @@ func deleteConvenientConfigItem(sectionName string) error {
 		return err
 	}
 
-	cfg, err := ini.Load(convenientConfigFile)
+	cfg, err := ini.Load(appConfig.ConvenientConfigFile)
 	if err != nil {
 		return err
 	}
 
 	cfg.DeleteSection(sectionName)
 
-	err = cfg.SaveTo(convenientConfigFile)
+	err = cfg.SaveTo(appConfig.ConvenientConfigFile)
 
 	return err
 }
@@ -82,7 +82,7 @@ func parseConvenientConfig() ConvenientConfig {
 		}
 	}
 
-	cfg, err := ini.Load(convenientConfigFile)
+	cfg, err := ini.Load(appConfig.ConvenientConfigFile)
 	if err != nil {
 		return ConvenientConfig{
 			Ready: false,
@@ -133,35 +133,35 @@ func parseConvenientConfig() ConvenientConfig {
 	}
 }
 func createIniFileIfNotExists() error {
-	file, err := os.OpenFile(convenientConfigFile, os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(appConfig.ConvenientConfigFile, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return err
 	}
-	file.Close()
+	_ = file.Close()
 	return nil
 }
 
 func serveConvenientConfigRead(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	go_utils.HeadContentTypeJson(w)
 
 	config := parseConvenientConfig()
-	json.NewEncoder(w).Encode(config)
+	_ = json.NewEncoder(w).Encode(config)
 }
 
 func serveDeleteConvenientConfigItem(w http.ResponseWriter, req *http.Request) {
 	sectionName := strings.TrimSpace(req.FormValue("sectionName"))
-	deleteConvenientConfigItem(sectionName)
+	_ = deleteConvenientConfigItem(sectionName)
 }
 
 func serveConvenientConfigAdd(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	go_utils.HeadContentTypeJson(w)
 	name := strings.TrimSpace(req.FormValue("name"))
 	template := strings.TrimSpace(req.FormValue("template"))
 	operations := strings.TrimSpace(req.FormValue("operations"))
 	ttl := strings.TrimSpace(req.FormValue("ttl"))
 
 	sectionName, result := convenientConfigNew(name, template, operations, ttl)
-	json.NewEncoder(w).Encode(struct {
+	_ = json.NewEncoder(w).Encode(struct {
 		Section string
 		Message string
 	}{sectionName, result})

@@ -2,39 +2,57 @@ package main
 
 import (
 	"flag"
+	"github.com/BurntSushi/toml"
 	"github.com/bingoohuang/go-utils"
+	"log"
 	"strconv"
+	"strings"
 )
 
-var (
-	contextPath    string
-	port           string
-	maxContentSize int64
+type AppConfig struct {
+	ContextPath string
+	ListenPort  int
 
-	devMode bool // to disable css/js minify
-	servers []RedisServer
+	EncryptKey  string
+	CookieName  string
+	RedirectUri string
+	LocalUrl    string
+	ForceLogin  bool
 
-	maxKeys              int
-	convenientConfigFile string
-	argServers           string
+	DevMode bool
 
-	authParam go_utils.MustAuthParam
-)
+	Servers              string
+	MaxContentSize       int64
+	MaxKeys              int
+	ConvenientConfigFile string
+}
+
+var configFile string
+var appConfig AppConfig
+var authParam go_utils.MustAuthParam
+var servers []RedisServer
+var port string
 
 func init() {
-	flag.StringVar(&contextPath, "contextPath", "", "context path")
-	var portArg int
-	flag.IntVar(&portArg, "port", 8269, "Port to serve.")
-	flag.Int64Var(&maxContentSize, "maxContentSize", 10000, "max content size to display.")
-	flag.BoolVar(&devMode, "devMode", false, "devMode(disable js/css minify)")
-
-	flag.StringVar(&argServers, "servers", "default=localhost:6379", "servers list, eg: Server1=localhost:6379,Server2=password2/localhost:6388/0")
-	flag.IntVar(&maxKeys, "maxKeys", 1000, "Max keys to be listed(0 means all keys).")
-	flag.StringVar(&convenientConfigFile, "convenientConfigFile", "convenient-config.ini", "convenient-config.ini file path")
-	go_utils.PrepareMustAuthFlag(&authParam)
+	flag.StringVar(&configFile, "configFile", "appConfig.toml", "config file path")
 
 	flag.Parse()
+	if _, err := toml.DecodeFile(configFile, &appConfig); err != nil {
+		log.Panic("config file decode error", err.Error())
+	}
 
-	port = strconv.Itoa(portArg)
-	servers = parseServers(argServers)
+	if appConfig.ContextPath != "" && strings.Index(appConfig.ContextPath, "/") < 0 {
+		appConfig.ContextPath = "/" + appConfig.ContextPath
+	}
+
+	port = strconv.Itoa(appConfig.ListenPort)
+	servers = parseServers(appConfig.Servers)
+
+	authParam = go_utils.MustAuthParam{
+		EncryptKey:  appConfig.EncryptKey,
+		CookieName:  appConfig.CookieName,
+		RedirectUri: appConfig.RedirectUri,
+		LocalUrl:    appConfig.LocalUrl,
+		ForceLogin:  appConfig.ForceLogin,
+	}
 }
