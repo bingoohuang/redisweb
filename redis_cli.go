@@ -127,6 +127,7 @@ func cliSendCommand(client *goredis.Client, cmds []string) string {
 func cliConnect(server RedisServer) *goredis.Client {
 	client := goredis.NewClient(server.Addr, server.Password)
 	client.SetMaxIdleConns(1)
+	_, _ = client.Do("SELECT", server.DefaultDb)
 	return client
 }
 
