@@ -1,17 +1,27 @@
 package main
 
 import (
+	"compress/gzip"
 	"fmt"
-	"github.com/bingoohuang/go-utils"
-	"github.com/gorilla/mux"
+	"io"
 	"log"
 	"net/http"
+	"net/http/httputil"
+	"runtime"
+	"strings"
+	"time"
+
+	"github.com/bingoohuang/gou/ran"
+	"github.com/gorilla/mux"
+	"github.com/skratchdot/open-golang/open"
 )
 
 func main() {
 	r := mux.NewRouter()
 
 	handleFunc(r, "/", serveHome, true)
+	handleFunc(r, "/static/css/{key}", serveCssStatic, true)
+	handleFunc(r, "/static/js/{key}", serveJsStatic, true)
 	handleFunc(r, "/favicon.png", serveImage("favicon.png"), false)
 	handleFunc(r, "/spritesheet.png", serveImage("spritesheet.png"), false)
 	handleFunc(r, "/listKeys", serveListKeys, true)
@@ -35,7 +45,7 @@ func main() {
 	http.Handle(appConfig.ContextPath+"/", r)
 
 	fmt.Println("start to listen at ", port)
-	go_utils.OpenExplorer(port)
+	OpenExplorer(port)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
@@ -43,14 +53,64 @@ func main() {
 	select {} // 阻塞
 }
 
+func OpenExplorerWithContext(contextPath, port string) {
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+
+		switch runtime.GOOS {
+		case "windows":
+			fallthrough
+		case "darwin":
+			open.Run("http://127.0.0.1:" + port + contextPath + "/?" + ran.String(10))
+		}
+	}()
+}
+
+func OpenExplorer(port string) {
+	OpenExplorerWithContext("", port)
+}
+
 func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter, *http.Request), requiredGzip bool) {
-	wrap := go_utils.DumpRequest(f)
+	wrap := DumpRequest(f)
 
 	if requiredGzip {
-		wrap = go_utils.GzipHandlerFunc(wrap)
+		wrap = GzipHandlerFunc(wrap)
 	}
 
-	wrap = go_utils.MustAuth(wrap, authParam)
-
 	r.HandleFunc(appConfig.ContextPath+path, wrap)
+}
+
+type GzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
+func (w GzipResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
+}
+
+func GzipHandlerFunc(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			fn(w, r)
+			return
+		}
+		w.Header().Set("Content-Encoding", "gzip")
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+		gzr := GzipResponseWriter{Writer: gz, ResponseWriter: w}
+		fn(gzr, r)
+	}
+}
+
+func DumpRequest(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Save a copy of this request for debugging.
+		requestDump, err := httputil.DumpRequest(r, true)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println(string(requestDump))
+		fn(w, r)
+	}
 }

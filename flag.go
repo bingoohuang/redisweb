@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"github.com/BurntSushi/toml"
-	"github.com/bingoohuang/go-utils"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/BurntSushi/toml"
 )
 
 type AppConfig struct {
@@ -27,16 +27,17 @@ type AppConfig struct {
 	ConvenientConfigFile string
 }
 
-var configFile string
-var appConfig AppConfig
-var authParam go_utils.MustAuthParam
-var servers []RedisServer
-var port string
+var (
+	configFile string
+	appConfig  AppConfig
+	servers    []RedisServer
+	port       string
+)
 
 func init() {
-	flag.StringVar(&configFile, "configFile", "appConfig.toml", "config file path")
-
+	flag.StringVar(&configFile, "config", "redisweb.toml", "config file path")
 	flag.Parse()
+
 	if _, err := toml.DecodeFile(configFile, &appConfig); err != nil {
 		log.Panic("config file decode error", err.Error())
 	}
@@ -47,12 +48,4 @@ func init() {
 
 	port = strconv.Itoa(appConfig.ListenPort)
 	servers = parseServers(appConfig.Servers)
-
-	authParam = go_utils.MustAuthParam{
-		EncryptKey:  appConfig.EncryptKey,
-		CookieName:  appConfig.CookieName,
-		RedirectUri: appConfig.RedirectUri,
-		LocalUrl:    appConfig.LocalUrl,
-		ForceLogin:  appConfig.ForceLogin,
-	}
 }

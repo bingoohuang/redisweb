@@ -2,11 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/bingoohuang/go-utils"
-	"github.com/go-ini/ini"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/bingoohuang/gou/ran"
+	"github.com/go-ini/ini"
 )
 
 type ConvenientItem struct {
@@ -34,7 +35,7 @@ func convenientConfigNew(name, template, operations, ttl string) (string, string
 		return "", err.Error()
 	}
 
-	sectionName := go_utils.RandString(10)
+	sectionName := ran.String(10)
 	section, err := cfg.NewSection(sectionName)
 	if err != nil {
 		return sectionName, err.Error()
@@ -142,7 +143,7 @@ func createIniFileIfNotExists() error {
 }
 
 func serveConvenientConfigRead(w http.ResponseWriter, req *http.Request) {
-	go_utils.HeadContentTypeJson(w)
+	HeadContentTypeJson(w)
 
 	config := parseConvenientConfig()
 	_ = json.NewEncoder(w).Encode(config)
@@ -154,7 +155,7 @@ func serveDeleteConvenientConfigItem(w http.ResponseWriter, req *http.Request) {
 }
 
 func serveConvenientConfigAdd(w http.ResponseWriter, req *http.Request) {
-	go_utils.HeadContentTypeJson(w)
+	HeadContentTypeJson(w)
 	name := strings.TrimSpace(req.FormValue("name"))
 	template := strings.TrimSpace(req.FormValue("template"))
 	operations := strings.TrimSpace(req.FormValue("operations"))
@@ -165,4 +166,8 @@ func serveConvenientConfigAdd(w http.ResponseWriter, req *http.Request) {
 		Section string
 		Message string
 	}{sectionName, result})
+}
+
+func HeadContentTypeJson(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 }

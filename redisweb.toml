@@ -1,12 +1,12 @@
-ContextPath = ""
+#ContextPath = ""
 ListenPort  = 8269
 # max content size to display.
 MaxContentSize = 10000
 DevMode = false
 # servers list, eg: Server1=localhost:6379,Server2=password2/localhost:6388/0
 Servers = "default=localhost:6379"
-# "Max keys to be listed(0 means all keys).
+# Max keys to be listed(0 means all keys).
 MaxKeys = 1000
-# convenient-config.ini file path
-ConvenientConfigFile = "convenient-config.ini"
+# convenient.ini file path
+ConvenientConfigFile = "convenient.ini"
 

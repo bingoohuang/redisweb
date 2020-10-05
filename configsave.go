@@ -2,14 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/BurntSushi/toml"
-	"github.com/bingoohuang/go-utils"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/BurntSushi/toml"
 )
 
 func serveSaveRedisServerConfig(w http.ResponseWriter, req *http.Request) {
-	go_utils.HeadContentTypeJson(w)
+	HeadContentTypeJson(w)
 	redisServerConfig := req.FormValue("redisServerConfig")
 
 	var redisServerConf RedisServerConf

@@ -3,10 +3,15 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/bingoohuang/go-utils"
+	"io"
+	"mime"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/markbates/pkger"
 )
 
 func downloadContent(w http.ResponseWriter, req *http.Request) {
@@ -21,7 +26,7 @@ func downloadContent(w http.ResponseWriter, req *http.Request) {
 }
 
 func serveShowContent(w http.ResponseWriter, req *http.Request) {
-	go_utils.HeadContentTypeJson(w)
+	HeadContentTypeJson(w)
 	key := strings.TrimSpace(req.FormValue("key"))
 	server := findRedisServer(req)
 
@@ -62,7 +67,37 @@ func serveRedisInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func serveImage(image string) func(w http.ResponseWriter, r *http.Request) {
-	data := MustAsset("res/" + image)
-	fi, _ := AssetInfo("res/" + image)
-	return go_utils.ServeImage(data, fi)
+	data := MustAsset("/res/" + image)
+	fi := AssetInfo("/res/" + image)
+	return ServeImage(data, fi)
+}
+
+func ServeImage(imageBytes []byte, fi os.FileInfo) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewReader(imageBytes)
+		w.Header().Set("Content-Type", DetectContentType(fi.Name()))
+		w.Header().Set("Last-Modified", fi.ModTime().UTC().Format(http.TimeFormat))
+		w.WriteHeader(http.StatusOK)
+		io.Copy(w, buffer)
+	}
+}
+
+func DetectContentType(name string) (t string) {
+	if t = mime.TypeByExtension(filepath.Ext(name)); t == "" {
+		t = "application/octet-stream"
+	}
+	return
+}
+
+func AssetInfo(name string) os.FileInfo {
+	f, err := pkger.Open(name)
+	if err != nil {
+		return nil
+	}
+
+	defer f.Close()
+
+	stat, _ := f.Stat()
+
+	return stat
 }

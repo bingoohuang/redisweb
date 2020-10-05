@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/bingoohuang/go-utils"
 	"net/http"
 	"sort"
 	"strconv"
@@ -15,7 +14,7 @@ type ListKeysResult struct {
 }
 
 func serveListKeys(w http.ResponseWriter, req *http.Request) {
-	go_utils.HeadContentTypeJson(w)
+	HeadContentTypeJson(w)
 	matchPattern := strings.TrimSpace(req.FormValue("pattern"))
 	cursorStr := strings.TrimSpace(req.FormValue("cursor"))
 	var cursor uint64

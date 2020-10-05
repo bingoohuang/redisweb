@@ -1,32 +1,25 @@
-# go-redis-web
-redis web admin based on go lang
+# redisweb
 
-# build
-1. `go get -u github.com/jteeuwen/go-bindata/...`
-2. `go get golang.org/x/tools/cmd/goimports`
-3. `./gobin.sh & go build` 
-5. build for linux:`env GOOS=linux GOARCH=amd64 go build -o go-redis-web.linux.bin`
-6. or build for windows 64bit: `env GOOS=windows GOARCH=amd64 go build`
+redis web ui based on golang.
 
-# startup
+## build
+
+1. `go get github.com/markbates/pkger/cmd/pkger && pkger`
+3. `go build` or `go install ./...`
+5. build for linux:`env GOOS=linux GOARCH=amd64 go build -o redisweb.linux.bin`
+6. build for windows 64bit: `env GOOS=windows GOARCH=amd64 go build`
+
+## startup
+
 ```bash
-bingoo@bingodeMacBook-Pro ~/G/go-redis-web> ./go-redis-web -h
-Usage of ./go-redis-web:
-  -contextPath string
-    	context path
-  -devMode
-    	devMode(disable js/css minify)
-  -port int
-    	Port to serve. (default 8269)
-  -servers string
-    	servers list, eg: Server1=localhost:6379,Server2=password2/localhost:6388/0 (default "default=localhost:6379")
+$ redisweb -h
+Usage of redisweb:
+  -config string
+        config file path (default "redisweb.toml")
 
-
-bingoo@bingodeMacBook-Pro ~/G/go-redis-web> nohup ./go-redis-web.linux.bin -servers=127.0.0.1:8051 -forceLogin -key=XXX -redirectUri=http://i.a.
-cn -localUrl=http://redis.a.b > go-redis-web.out 2>&1 &
 ```
 
-# snapshots
+## snapshots
 ![image](https://user-images.githubusercontent.com/1940588/30140520-d5e9c8da-93a7-11e7-8b79-09cc3c24ed26.png)
 ![image](https://user-images.githubusercontent.com/1940588/30140593-45752924-93a8-11e7-8afc-033198aa13c1.png)
 ![image](https://user-images.githubusercontent.com/1940588/30140608-67b17132-93a8-11e7-8034-085e6f1ded26.png)
