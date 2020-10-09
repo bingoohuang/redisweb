@@ -62,7 +62,7 @@ func createDefaultConvenientConfigFile() {
 	}
 
 	if _, err := os.Stat(appConfig.ConvenientConfigFile); os.IsNotExist(err) {
-		ioutil.WriteFile(configFile, []byte(`
+		ioutil.WriteFile(appConfig.ConvenientConfigFile, []byte(`
 [convenient1]
 name       = 登录验证码
 template   = captcha:{mobile}:/login
