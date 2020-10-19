@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -47,12 +48,14 @@ func AssetNames() []string {
 
 func serveJsStatic(w http.ResponseWriter, r *http.Request) {
 	dir := http.FileServer(pkger.Dir("/res"))
-	ServeStaticFolder(w, r, dir, "/static")
+	prefix := filepath.Join(appConfig.ContextPath, "/static")
+	ServeStaticFolder(w, r, dir, prefix)
 }
 
 func serveCssStatic(w http.ResponseWriter, r *http.Request) {
 	dir := http.FileServer(pkger.Dir("/res"))
-	ServeStaticFolder(w, r, dir, "/static")
+	prefix := filepath.Join(appConfig.ContextPath, "/static")
+	ServeStaticFolder(w, r, dir, prefix)
 }
 
 func ServeStaticFolder(w http.ResponseWriter, r *http.Request, dir http.Handler, prefix string) {

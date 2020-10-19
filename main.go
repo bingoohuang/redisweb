@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -42,15 +43,13 @@ func main() {
 	handleFunc(r, "/saveRedisServerConfig", serveSaveRedisServerConfig, false)
 	handleFunc(r, "/changeRedisServer", serveChangeRedisServer, false)
 
-	http.Handle(appConfig.ContextPath+"/", r)
+	http.Handle("/", r)
 
 	fmt.Println("start to listen at ", port)
-	OpenExplorer(port)
+	OpenExplorerWithContext(appConfig.ContextPath, port)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
-
-	select {} // 阻塞
 }
 
 func OpenExplorerWithContext(contextPath, port string) {
@@ -61,13 +60,9 @@ func OpenExplorerWithContext(contextPath, port string) {
 		case "windows":
 			fallthrough
 		case "darwin":
-			open.Run("http://127.0.0.1:" + port + contextPath + "/?" + ran.String(10))
+			open.Run("http://127.0.0.1:" + port + contextPath + "?" + ran.String(10))
 		}
 	}()
-}
-
-func OpenExplorer(port string) {
-	OpenExplorerWithContext("", port)
 }
 
 func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter, *http.Request), requiredGzip bool) {
@@ -77,7 +72,12 @@ func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter, *http.Re
 		wrap = GzipHandlerFunc(wrap)
 	}
 
-	r.HandleFunc(appConfig.ContextPath+path, wrap)
+	p := filepath.Join(appConfig.ContextPath, path)
+	if p != "/" {
+		p = strings.TrimSuffix(p, "/")
+	}
+
+	r.HandleFunc(p, wrap)
 }
 
 type GzipResponseWriter struct {

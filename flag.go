@@ -48,7 +48,7 @@ func init() {
 
 	createDefaultConvenientConfigFile()
 
-	if appConfig.ContextPath != "" && strings.Index(appConfig.ContextPath, "/") < 0 {
+	if appConfig.ContextPath != "" && !strings.HasPrefix(appConfig.ContextPath, "/") {
 		appConfig.ContextPath = "/" + appConfig.ContextPath
 	}
 
@@ -91,7 +91,7 @@ ttl        = -1s
 func createDefaultRedisWebConfigFile() {
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		ioutil.WriteFile(configFile, []byte(`
-#ContextPath = ""
+ContextPath = "/redisweb"
 ListenPort  = 8269
 # max content size to display.
 MaxContentSize = 10000
