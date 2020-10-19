@@ -4,23 +4,30 @@
     <title>redisweb</title>
     <link rel="icon" type="image/x-icon" href="favicon.png">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.png">
-    <link href="${ContextPath}/static/css/codemirror-5.37.0.min.css" rel="stylesheet">
-    <link href="${ContextPath}/static/css/jquery.modal-0.9.1.min.css" rel="stylesheet">
+    <style>
+        .sprite {
+            background: url(${ContextPath}/spritesheet.png) no-repeat;
+            vertical-align: middle;
+        }
+    </style>
     <style>
         /*.CSS*/
     </style>
+    <link href="${ContextPath}/static/css/codemirror-5.37.0.min.css" rel="stylesheet">
+    <link href="${ContextPath}/static/css/jquery.modal-0.9.1.min.css" rel="stylesheet">
+
 </head>
 <body>
 
 <div id="sidebar">
     <div class="operationArea">
         <i id="maintainRedisServers" title="maintain redis servers" class="sprite sprite-redis"></i><select
-            id="servers">
-        <serverOptions/>
-    </select>
+                id="servers">
+            <serverOptions/>
+        </select>
         db:<select id="databases">
-        <databaseOptions/>
-    </select>
+            <databaseOptions/>
+        </select>
         <span id="redisInfo" title="redis info" class="sprite sprite-info"></span>
         <span id="redisTerminal" title="redis cli terminal" class="sprite sprite-terminal"></span>
         <span id="redisImport" title="import commands" class="sprite sprite-import"></span>
