@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/bingoohuang/gou/ran"
@@ -42,7 +43,7 @@ func convenientConfigNew(name, template, operations, ttl string) (string, string
 	}
 
 	_, _ = section.NewKey("name", name)
-	_, _ = section.NewKey("template", template)
+	_, _ = section.NewKey("template", strconv.Quote(template))
 	_, _ = section.NewKey("operations", operations)
 	_, _ = section.NewKey("ttl", ttl)
 
@@ -118,10 +119,15 @@ func parseConvenientConfig() ConvenientConfig {
 			ttl = ttlKey.MustString("-1s")
 		}
 
+		tmpl := template.String()
+		if t, err := strconv.Unquote(tmpl); err == nil {
+			tmpl = t
+		}
+
 		items = append([]ConvenientItem{{
 			Section:    sectionName,
 			Name:       name,
-			Template:   template.String(),
+			Template:   tmpl,
 			Operations: strings.Split(operations, ","),
 			Ttl:        ttl,
 		}}, items...)

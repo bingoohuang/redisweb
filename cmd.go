@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis"
 	"log"
-	"regexp"
 	"strconv"
 	"time"
 	"unicode"
@@ -314,8 +313,6 @@ func convertString(s string) string {
 	return quote[1 : len(quote)-1]
 }
 
-var re = regexp.MustCompile(`\\x(..)`)
-
 func parseStringFormat(s string) (string, string) {
 	if s == "" {
 		return s, "UNKNOWN"
@@ -329,9 +326,7 @@ func parseStringFormat(s string) (string, string) {
 		return s, "NORMAL"
 	}
 
-	quote := strconv.Quote(s)
-	quote = re.ReplaceAllString(quote, `$1 `)
-	return quote[1 : len(quote)-1], "UNKNOWN"
+	return strconv.Quote(s), "UNKNOWN"
 }
 
 func isJSON(s string) bool {
@@ -400,7 +395,7 @@ func listKeys(server RedisServer, cursor uint64, matchPattern string, maxKeys in
 				conentLen = -1
 			}
 
-			allKeys = append(allKeys, KeysResult{Key: key, Type: valType, Len: conentLen})
+			allKeys = append(allKeys, KeysResult{Key: strconv.Quote(key), Type: valType, Len: conentLen})
 		}
 
 		if ncursor == 0 || (maxKeys > 0 && len(allKeys) >= maxKeys) {

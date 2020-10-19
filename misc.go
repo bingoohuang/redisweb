@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -30,6 +31,9 @@ func serveShowContent(w http.ResponseWriter, req *http.Request) {
 	key := strings.TrimSpace(req.FormValue("key"))
 	server := findRedisServer(req)
 
+	if k, err := strconv.Unquote(key); err == nil {
+		key = k
+	}
 	content := displayContent(server, key, true, false)
 	_ = json.NewEncoder(w).Encode(content)
 }
@@ -44,6 +48,9 @@ func serveNewKey(w http.ResponseWriter, req *http.Request) {
 	server := findRedisServer(req)
 
 	// log.Println("keyType:", keyType, ",key:", key, ",ttl:", ttl, ",format:", format, ",value:", value)
+	if k, err := strconv.Unquote(key); err == nil {
+		key = k
+	}
 
 	ok := newKey(server, keyType, key, ttl, value)
 	_, _ = w.Write([]byte(ok))
