@@ -143,15 +143,16 @@ func newKey(server RedisServer, keyType, key, ttl, val string) string {
 
 	switch keyType {
 	case "string":
-		var str string
-		err = json.Unmarshal([]byte(val), &str)
-		if err == nil {
-			val, err = strconv.Unquote(val)
-			if err != nil {
-				return err.Error()
-			}
-			_, err = client.Set(key, str, duration).Result()
+		str := val
+		if err = json.Unmarshal([]byte(val), &str); err != nil {
+			str = val
 		}
+		if k, err := strconv.Unquote(str); err == nil {
+			str = k
+		}
+
+		_, err = client.Set(key, str, duration).Result()
+
 	case "hash":
 		var hash map[string]interface{}
 		err = json.Unmarshal([]byte(val), &hash)
