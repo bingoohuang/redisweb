@@ -8,8 +8,8 @@ require (
 	github.com/alicebob/miniredis v2.4.5+incompatible // indirect
 	github.com/bingoohuang/gou v0.0.0-20200714112627-3254bbe11221
 	github.com/go-ini/ini v1.39.2
-	github.com/go-redis/redis v6.14.2+incompatible
-	github.com/gomodule/redigo v2.0.0+incompatible // indirect
+	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/gomodule/redigo v1.8.2 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.6.2
