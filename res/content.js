@@ -84,8 +84,12 @@ $(function () {
                     showContentTtlInterval = null
                 }
             }, 1000)
-        }
 
+            ttlTd.click(function () { // 点击准吧调整ttl，此时停止倒计时Countdown Timer
+                clearInterval(showContentTtlInterval)
+                showContentTtlInterval = null
+            })
+        }
 
         $.codeMirror = null
         if (format === "JSON" && size < 5000) {
