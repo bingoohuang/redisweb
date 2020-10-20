@@ -362,6 +362,19 @@ func listKeys(server RedisServer, cursor uint64, matchPattern string, maxKeys in
 	client := newRedisClient(server)
 	defer client.Close()
 
+	exists, _ := client.Exists(matchPattern).Result()
+	if exists == 1 {
+		valType, err := client.Type(matchPattern).Result()
+		if err != nil {
+			return nil, 0, err
+		}
+		l := contentLen(valType, client, matchPattern)
+
+		return []KeysResult{
+			{Key: strconv.Quote(matchPattern), Type: valType, Len: l},
+		}, 0, nil
+	}
+
 	allKeys := make([]KeysResult, 0)
 	var keys []string
 	ncursor := cursor
@@ -379,23 +392,9 @@ func listKeys(server RedisServer, cursor uint64, matchPattern string, maxKeys in
 				return nil, ncursor, err
 			}
 
-			var conentLen int64
-			switch valType {
-			case "string":
-				conentLen, _ = client.StrLen(key).Result()
-			case "list":
-				conentLen, _ = client.LLen(key).Result()
-			case "hash":
-				conentLen, _ = client.HLen(key).Result()
-			case "set":
-				conentLen, _ = client.SCard(key).Result()
-			case "zset":
-				conentLen, _ = client.ZCard(key).Result()
-			default:
-				conentLen = -1
-			}
+			l := contentLen(valType, client, key)
 
-			allKeys = append(allKeys, KeysResult{Key: strconv.Quote(key), Type: valType, Len: conentLen})
+			allKeys = append(allKeys, KeysResult{Key: strconv.Quote(key), Type: valType, Len: l})
 		}
 
 		if ncursor == 0 || (maxKeys > 0 && len(allKeys) >= maxKeys) {
@@ -404,4 +403,23 @@ func listKeys(server RedisServer, cursor uint64, matchPattern string, maxKeys in
 	}
 
 	return allKeys, ncursor, nil
+}
+
+func contentLen(valType string, client *redis.Client, key string) int64 {
+	var l int64
+	switch valType {
+	case "string":
+		l, _ = client.StrLen(key).Result()
+	case "list":
+		l, _ = client.LLen(key).Result()
+	case "hash":
+		l, _ = client.HLen(key).Result()
+	case "set":
+		l, _ = client.SCard(key).Result()
+	case "zset":
+		l, _ = client.ZCard(key).Result()
+	default:
+		l = -1
+	}
+	return l
 }
