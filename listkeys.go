@@ -16,6 +16,11 @@ type ListKeysResult struct {
 func serveListKeys(w http.ResponseWriter, req *http.Request) {
 	HeadContentTypeJson(w)
 	matchPattern := strings.TrimSpace(req.FormValue("pattern"))
+
+	if k, err := strconv.Unquote(matchPattern); err == nil {
+		matchPattern = k
+	}
+
 	cursorStr := strings.TrimSpace(req.FormValue("cursor"))
 	var cursor uint64
 	var err error
