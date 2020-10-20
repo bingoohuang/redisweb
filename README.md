@@ -5,9 +5,9 @@ redis web ui based on golang.
 ## build
 
 1. `go get github.com/markbates/pkger/cmd/pkger && pkger`
-3. `go build` or `go install ./...`
-5. build for linux:`env GOOS=linux GOARCH=amd64 go build -o redisweb.linux.bin`
-6. build for windows 64bit: `env GOOS=windows GOARCH=amd64 go build`
+1. `go build` or `go install ./...`
+1. linux:`env GOOS=linux GOARCH=amd64 go build -o redisweb`
+1. windows: `env GOOS=windows GOARCH=amd64 go build`
 
 ## startup
 
