@@ -12,11 +12,12 @@ import (
 )
 
 type ConvenientItem struct {
-	Section    string
-	Name       string
-	Template   string
-	Operations []string
-	Ttl        string
+	Section       string
+	Name          string
+	Template      string
+	ValueTemplate string
+	Operations    []string
+	Ttl           string
 }
 
 type ConvenientConfig struct {
@@ -25,7 +26,7 @@ type ConvenientConfig struct {
 	Items []ConvenientItem
 }
 
-func convenientConfigNew(name, template, operations, ttl string) (string, string) {
+func convenientConfigNew(name, template, valueTemplate, operations, ttl string) (string, string) {
 	err := createIniFileIfNotExists()
 	if err != nil {
 		return "", err.Error()
@@ -44,6 +45,7 @@ func convenientConfigNew(name, template, operations, ttl string) (string, string
 
 	_, _ = section.NewKey("name", name)
 	_, _ = section.NewKey("template", strconv.Quote(template))
+	_, _ = section.NewKey("valueTemplate", strconv.Quote(valueTemplate))
 	_, _ = section.NewKey("operations", operations)
 	_, _ = section.NewKey("ttl", ttl)
 
@@ -106,7 +108,6 @@ func parseConvenientConfig() ConvenientConfig {
 			name = nameKey.MustString(name)
 		}
 
-		template, _ := section.GetKey("template")
 		operationsKey, _ := section.GetKey("operations")
 		operations := "save, delete"
 		if operationsKey != nil {
@@ -119,17 +120,29 @@ func parseConvenientConfig() ConvenientConfig {
 			ttl = ttlKey.MustString("-1s")
 		}
 
+		template, _ := section.GetKey("template")
 		tmpl := template.String()
 		if t, err := strconv.Unquote(tmpl); err == nil {
 			tmpl = t
 		}
 
+		valueTemplate, _ := section.GetKey("valueTemplate")
+		valueTmpl := ""
+		if valueTemplate != nil {
+			valueTmpl = valueTemplate.String()
+		}
+
+		if t, err := strconv.Unquote(valueTmpl); err == nil {
+			valueTmpl = t
+		}
+
 		items = append([]ConvenientItem{{
-			Section:    sectionName,
-			Name:       name,
-			Template:   tmpl,
-			Operations: strings.Split(operations, ","),
-			Ttl:        ttl,
+			Section:       sectionName,
+			Name:          name,
+			Template:      tmpl,
+			ValueTemplate: valueTmpl,
+			Operations:    strings.Split(operations, ","),
+			Ttl:           ttl,
 		}}, items...)
 	}
 
@@ -164,10 +177,11 @@ func serveConvenientConfigAdd(w http.ResponseWriter, req *http.Request) {
 	HeadContentTypeJson(w)
 	name := strings.TrimSpace(req.FormValue("name"))
 	template := strings.TrimSpace(req.FormValue("template"))
+	valueTemplate := strings.TrimSpace(req.FormValue("valueTemplate"))
 	operations := strings.TrimSpace(req.FormValue("operations"))
 	ttl := strings.TrimSpace(req.FormValue("ttl"))
 
-	sectionName, result := convenientConfigNew(name, template, operations, ttl)
+	sectionName, result := convenientConfigNew(name, template, valueTemplate, operations, ttl)
 	_ = json.NewEncoder(w).Encode(struct {
 		Section string
 		Message string

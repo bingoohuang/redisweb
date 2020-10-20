@@ -31,6 +31,7 @@ $(function () {
         var convenientContent =
             '<div><span>Name:</span><span><input class="templateName"></span></div>' +
             '<div><span>Key Template:</span><span><input class="templateValue"></span></div>' +
+            '<div><span>Value Template:</span><span><input class="valueTemplateValue"></span></div>' +
             '<div><span>TTL:</span><span><input class="ttlCreated" value="-1s"></span></div>' +
             '<div><span>Operations:</span><span><input style="width:12px" type="checkbox" id="DeleteChk" value="Delete" checked><label for="DeleteChk">Delete</label>' +
             '<input  style="width:12px" type="checkbox" id="SaveChk" value="Save" checked><label for="SaveChk">Save</label></span></div>' +
@@ -48,6 +49,7 @@ $(function () {
                 data: {
                     name: $convenientContent.find('input.templateName').val(),
                     template: $convenientContent.find('input.templateValue').val(),
+                    valueTemplate: $convenientContent.find('input.valueTemplateValue').val(),
                     operations: operations,
                     ttl: $convenientContent.find('input.ttlCreated').val()
                 },
@@ -142,6 +144,13 @@ $(function () {
             convenientContent += '<div class="variables"><span>' + variables[i] + ':</span><span><input placeholder="variable value"></span></div>'
         }
 
+        convenientContent += '<div><span>Value Template:</span><span class="valueTemplateValue">' + item.ValueTemplate + ' </span></div>'
+
+        var variables2 = parseTemplateVariables(item.ValueTemplate)
+        for (var i = 0, len = variables2.length; i < len; i++) {
+            convenientContent += '<div class="variables2"><span>' + variables2[i] + ':</span><span><input placeholder="variable value"></span></div>'
+        }
+
         convenientContent += '<div><span>Key:</span><span class="keyCreated"></span></div>'
             + '<div><span>TTL:</span><span class="ttlCreated"><input value="' + item.Ttl + '"></span></div>'
             + '<div><span>Value:<br/><span class="info"></span></span><span><textarea class="valueTextArea"></textarea></span></div>'
@@ -163,6 +172,9 @@ $(function () {
         $('div.variables input').keyup(instantiateTemplate).change(instantiateTemplate).blur(function () {
             refreshValue(' ')
         })
+
+        $('div.variables2 input').keyup(instantiateValueTemplate).change(instantiateValueTemplate);
+
         itemButtonClickable()
     }
 
@@ -195,6 +207,20 @@ $(function () {
             $.showContentAjax(templateValue)
         })
     }
+
+    var instantiateValueTemplate = function () {
+        var templateValue = $('span.valueTemplateValue').text()
+        $('div.variables2').each(function (index, div) {
+            var $div = $(div)
+            var variableName = $div.find('span:first').text()
+            variableName = variableName.substring(0, variableName.length - 1)
+            var variableValue = $div.find('input').val()
+            templateValue = templateValue.replace("{" + variableName + "}", variableValue)
+        })
+
+        $(".valueTextArea").val(templateValue);
+    }
+
     var refreshValue = function (resultTip) {
         clearConvenientContentInfo()
         var keyCreated = $('.keyCreated').text()
