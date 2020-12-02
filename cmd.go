@@ -154,10 +154,22 @@ func newKey(server RedisServer, keyType, key, ttl, val string) string {
 		_, err = client.Set(key, str, duration).Result()
 
 	case "hash":
-		var hash map[string]interface{}
+		var hash map[string]string
 		err = json.Unmarshal([]byte(val), &hash)
 		if err == nil {
-			_, err = client.HMSet(key, hash).Result()
+			h := make(map[string]interface{})
+			for k, v := range hash {
+				if kk, err := strconv.Unquote(k); err == nil {
+					k = kk
+				}
+				if vv, err := strconv.Unquote(v); err == nil {
+					v = vv
+				}
+
+				h[k] = v
+			}
+
+			_, err = client.HMSet(key, h).Result()
 		}
 		if err == nil && duration > 0 {
 			client.Expire(key, duration)
@@ -310,8 +322,7 @@ func convertString(s string) string {
 		return s
 	}
 
-	quote := strconv.Quote(s)
-	return quote[1 : len(quote)-1]
+	return strconv.Quote(s)
 }
 
 func parseStringFormat(s string) (string, string) {
