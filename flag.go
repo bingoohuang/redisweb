@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -27,6 +26,7 @@ type AppConfig struct {
 	MaxContentSize       int64
 	MaxKeys              int
 	ConvenientConfigFile string
+	BasicAuth            string
 }
 
 var (
@@ -62,7 +62,7 @@ func createDefaultConvenientConfigFile() {
 	}
 
 	if _, err := os.Stat(appConfig.ConvenientConfigFile); os.IsNotExist(err) {
-		ioutil.WriteFile(appConfig.ConvenientConfigFile, []byte(`
+		os.WriteFile(appConfig.ConvenientConfigFile, []byte(`
 [convenient1]
 name       = 登录验证码
 template   = captcha:{mobile}:/login
@@ -90,7 +90,7 @@ ttl        = -1s
 
 func createDefaultRedisWebConfigFile() {
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		ioutil.WriteFile(configFile, []byte(`
+		os.WriteFile(configFile, []byte(`
 ContextPath = "/redisweb"
 ListenPort  = 8269
 # max content size to display.
@@ -102,6 +102,7 @@ Servers = "default=localhost:6379"
 MaxKeys = 1000
 # convenient.ini file path
 ConvenientConfigFile = "convenient.ini"
+BasicAuth = "user:pass"
 `), 0644)
 	}
 }

@@ -9,4 +9,4 @@ Servers = "default=localhost:6379"
 MaxKeys = 1000
 # convenient.ini file path
 ConvenientConfigFile = "convenient.ini"
-
+BasicAuth = "user:pass"

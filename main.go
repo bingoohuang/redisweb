@@ -2,6 +2,7 @@ package main
 
 import (
 	"compress/gzip"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"log"
@@ -66,7 +67,8 @@ func OpenExplorerWithContext(contextPath, port string) {
 }
 
 func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter, *http.Request), requiredGzip bool) {
-	wrap := DumpRequest(f)
+	//wrap := DumpRequest(f)
+	wrap := f
 
 	if requiredGzip {
 		wrap = GzipHandlerFunc(wrap)
@@ -77,7 +79,64 @@ func handleFunc(r *mux.Router, path string, f func(http.ResponseWriter, *http.Re
 		p = strings.TrimSuffix(p, "/")
 	}
 
+	if appConfig.BasicAuth != "" {
+		wrap = basicAuth(wrap, appConfig.BasicAuth)
+	}
+
 	r.HandleFunc(p, wrap)
+}
+
+// AsciiEqualFold is [strings.EqualFold], ASCII only. It reports whether s and t
+// are equal, ASCII-case-insensitively.
+func AsciiEqualFold(s, t string) bool {
+	if len(s) != len(t) {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		if lower(s[i]) != lower(t[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// lower returns the ASCII lowercase version of b.
+func lower(b byte) byte {
+	if 'A' <= b && b <= 'Z' {
+		return b + ('a' - 'A')
+	}
+	return b
+}
+
+// parseBasicAuth parses an HTTP Basic Authentication string.
+// "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==" returns ("Aladdin", "open sesame", true).
+func parseBasicAuth(auth string) (usernamePassword string, ok bool) {
+	const prefix = "Basic "
+	// Case insensitive prefix match. See Issue 22736.
+	if len(auth) < len(prefix) || !AsciiEqualFold(auth[:len(prefix)], prefix) {
+		return "", false
+	}
+	c, err := base64.StdEncoding.DecodeString(auth[len(prefix):])
+	if err != nil {
+		return "", false
+	}
+	return string(c), true
+}
+
+func basicAuth(next http.HandlerFunc, basicUserPassword string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		auth := r.Header.Get("Authorization")
+		if auth != "" {
+			realAuth, _ := parseBasicAuth(auth)
+			if realAuth == basicUserPassword {
+				next.ServeHTTP(w, r)
+				return
+			}
+		}
+
+		w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	}
 }
 
 type GzipResponseWriter struct {
